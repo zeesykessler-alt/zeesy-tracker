@@ -637,25 +637,36 @@
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;if(msg){t.classList.add('show');}else{t.classList.remove('show');}}
 
   function saveAsPNG(){
-    const btns=document.querySelectorAll('.save-btn,.tabs,button,.feedback-btn');
-    btns.forEach(b=>b.style.display='none');
-    html2canvas(document.querySelector('.page'),{
-      backgroundColor:'#fdf8f5',scale:2,useCORS:true,logging:false
-    }).then(canvas=>{
-      btns.forEach(b=>b.style.display='');
-      const imgData=canvas.toDataURL('image/png');
-      const win=window.open('','_blank');
-      if(win){
-        win.document.write('<html><body style="margin:0;background:#000"><img src="'+imgData+'" style="max-width:100%;display:block"><p style="color:white;text-align:center;font-family:sans-serif;padding:10px;font-size:14px">Long press the image \u2192 Save to Photos</p></body></html>');
-        win.document.close();
+  const btns=document.querySelectorAll('button');
+  btns.forEach(b=>b.style.display='none');
+  html2canvas(document.querySelector('.page'),{
+    backgroundColor:'#fdf8f5',scale:2,useCORS:true,logging:false
+  }).then(async canvas=>{
+    btns.forEach(b=>b.style.display='');
+    canvas.toBlob(async blob=>{
+      const file = new File([blob],'tracker.png',{type:'image/png'});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({files:[file],title:'My tracker'});
+        }catch(e){
+          if(e.name!=='AbortError'){
+            const link=document.createElement('a');
+            link.download='tracker.png';
+            link.href=canvas.toDataURL('image/png');
+            link.click();
+          }
+        }
       } else {
         const link=document.createElement('a');
-        link.download='tracker-'+todayKey+'.png';
-        link.href=imgData;
+        link.download='tracker.png';
+        link.href=canvas.toDataURL('image/png');
         link.click();
       }
-    }).catch(()=>showToast('Try on desktop if this fails'));
-  }
+    },'image/png');
+  }).catch(()=>{
+    btns.forEach(b=>b.style.display='');
+  });
+}
 
   function openFeedback(){document.getElementById('feedbackOverlay').classList.add('open');document.getElementById('feedbackText').focus();}
   function closeFeedback(){document.getElementById('feedbackOverlay').classList.remove('open');document.getElementById('copiedNote').style.display='none';document.getElementById('feedbackText').value='';}
