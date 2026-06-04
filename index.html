@@ -100,7 +100,12 @@
   <div class="header-tag">Week 1 · Stabilise</div>
   <h1>Daily Check-In</h1>
   <div class="header-date" id="dateDisplay"></div>
-  <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.4);">Started: <span id="startDateDisplay" onclick="changeStartDate()" style="text-decoration:underline;cursor:pointer;color:var(--rose);">tap to set</span></div>
+  <div style="margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;">
+    <button onclick="shiftDay(-1)" style="background:rgba(255,255,255,0.1);border:none;color:white;border-radius:20px;padding:5px 12px;font-size:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;">‹</button>
+    <input type="date" id="dayPicker" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:20px;padding:5px 12px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;" onchange="jumpToDate(this.value)">
+    <button onclick="shiftDay(1)" style="background:rgba(255,255,255,0.1);border:none;color:white;border-radius:20px;padding:5px 12px;font-size:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;">›</button>
+  </div>
+  <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,0.4);">Started: <span id="startDateDisplay" onclick="changeStartDate()" style="text-decoration:underline;cursor:pointer;color:var(--rose);">tap to set</span></div>
 </div>
 <div class="week-bar">
   <div><div class="week-title">Week 1 — Stabilise</div><div class="week-sub">Regulate hunger, energy &amp; sleep</div></div>
@@ -234,20 +239,51 @@
 <div class="toast" id="toast"></div>
 <script>
   const today=new Date();
-  document.getElementById('dateDisplay').textContent=today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   const todayKey=today.toISOString().split('T')[0];
+  let activeKey=todayKey; // the day currently being viewed/edited
   let checks={};
+
+  function setActiveDate(dateStr) {
+    activeKey = dateStr;
+    const d = new Date(dateStr);
+    document.getElementById('dateDisplay').textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    document.getElementById('dayPicker').value = dateStr;
+    // Reset form
+    checks={};
+    document.querySelectorAll('.habit-item').forEach(el=>el.classList.remove('checked'));
+    ['breakfast','lunch','supper'].forEach(m=>{const el=document.getElementById('meal_'+m);if(el)el.value='';});
+    document.getElementById('stepsInput').value='';
+    document.getElementById('winInput').value='';
+    updateSteps(0);
+    updateScore();
+    loadDay(dateStr);
+  }
+
+  function shiftDay(dir) {
+    const d = new Date(activeKey);
+    d.setDate(d.getDate() + dir);
+    // Don't go into the future
+    if(d > today) return;
+    setActiveDate(d.toISOString().split('T')[0]);
+  }
+
+  function jumpToDate(val) {
+    if(!val) return;
+    const d = new Date(val);
+    if(d > today) return;
+    setActiveDate(val);
+  }
 
   // Start date logic
   let startDate = localStorage.getItem('pp_start_date') || todayKey;
-  
+
   function updateStartDisplay() {
     const d = new Date(startDate);
     document.getElementById('startDateDisplay').textContent = d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   }
-  
+
   function changeStartDate() {
-    const input = prompt('Enter your start date (YYYY-MM-DD format, e.g. 2026-06-02):');
+    const input = prompt('Enter your start date (YYYY-MM-DD, e.g. 2026-06-02):');
     if (input && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
       startDate = input;
       localStorage.setItem('pp_start_date', startDate);
@@ -255,13 +291,13 @@
       updateWeekBar();
     }
   }
-  
+
   function getDayNumber() {
     const start = new Date(startDate);
-    const diff = Math.floor((new Date(todayKey) - start) / 86400000);
+    const diff = Math.floor((new Date(activeKey) - start) / 86400000);
     return Math.max(0, diff);
   }
-  
+
   function updateWeekBar() {
     const day = getDayNumber();
     const phases = [
@@ -280,7 +316,11 @@
     document.querySelector('.week-title').textContent = phase.title;
     document.querySelector('.week-sub').textContent = phase.sub;
   }
-  
+
+  // Init
+  document.getElementById('dayPicker').value = todayKey;
+  document.getElementById('dayPicker').max = todayKey;
+  document.getElementById('dateDisplay').textContent = today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   updateStartDisplay();
   updateWeekBar();
 
@@ -600,24 +640,23 @@
 
   async function saveDay(){
     const entry={
-      date:todayKey,
-      dateLabel:today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
+      date:activeKey,
+      dateLabel:new Date(activeKey).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
       checks:{...checks},score:Object.values(checks).filter(Boolean).length,
       meals:{breakfast:document.getElementById('meal_breakfast').value,lunch:document.getElementById('meal_lunch').value,supper:document.getElementById('meal_supper').value},
       steps:document.getElementById('stepsInput').value||'0',
       win:document.getElementById('winInput').value
     };
     showToast('Saving... \u23F3');
-    allData[todayKey] = entry;
+    allData[activeKey] = entry;
     await saveData(allData);
     showToast('Saved! Well done today \uD83C\uDF38');
   }
 
-  async function loadToday(){
-    showToast('Loading... \u23F3');
+  async function loadDay(dateStr){
     allData = await loadData();
-    const e = allData[todayKey];
-    if(!e){ showToast(''); return; }
+    const e = allData[dateStr];
+    if(!e){ updateScore(); showToast(''); return; }
     checks=e.checks||{};
     Object.entries(checks).forEach(([k,v])=>{if(v)document.querySelector('[data-key="'+k+'"]')?.classList.add('checked');});
     if(e.meals){['breakfast','lunch','supper'].forEach(m=>{const el=document.getElementById('meal_'+m);if(el&&e.meals[m])el.value=e.meals[m];});}
@@ -625,6 +664,11 @@
     if(e.win)document.getElementById('winInput').value=e.win;
     updateScore();
     showToast('');
+  }
+
+  async function loadToday(){
+    showToast('Loading... \u23F3');
+    await loadDay(activeKey);
   }
 
   function renderHistory(){
