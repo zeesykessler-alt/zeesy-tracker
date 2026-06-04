@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Daily Check-In</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -46,12 +46,27 @@
   .meal-input::placeholder{color:#c4a090;font-style:italic;}
   .cat-btn{margin-top:8px;background:none;border:1.5px solid var(--rose);border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--warm);cursor:pointer;font-weight:500;-webkit-tap-highlight-color:transparent;}
   .cat-btn:active{background:var(--blush);}
-  .formula-fields{padding:0 0 4px 0;}
-  .formula-field-row{display:flex;align-items:center;gap:0;border-bottom:1px solid #faf0ec;}
-  .formula-field-row:last-child{border-bottom:none;}
-  .formula-input{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);padding:10px 12px;outline:none;}
-  .formula-input::placeholder{color:#c4a090;font-style:italic;}
-  .formula-check{width:80px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;border-right:1px solid #faf0ec;}
+  .meal-row{display:flex;align-items:center;border-bottom:1px solid #f0e8e4;}
+  .formula-input{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);padding:12px 14px;outline:none;min-width:0;}
+  .formula-input::placeholder{color:#b89080;}
+  .formula-check{width:76px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;border-right:1px solid #f0e8e4;}
+  .formula-check:active{background:var(--blush);}
+  .formula-check.ticked{background:var(--green-light);}
+  .formula-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--rose);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;margin-bottom:3px;transition:all 0.2s;}
+  .formula-check.ticked .formula-box{background:var(--green);border-color:var(--green);color:white;}
+  .formula-label{font-size:10px;color:var(--text);font-weight:500;text-align:center;}
+  /* Fix date picker readability */
+  input[type="date"]{color:var(--text) !important;background:rgba(255,255,255,0.15) !important;border-color:rgba(255,255,255,0.35) !important;}
+  input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);}
+  /* Fix all button text */
+  .nav-btn{color:white !important;}
+  #startDateDisplay{color:var(--rose) !important;}
+  /* Fix steps hint */
+  .steps-hint{color:var(--text) !important;font-size:12px;}
+  /* Fix history empty */
+  .h-empty{color:var(--muted);}
+  /* Fix score pill */
+  .score-pill{color:var(--deep) !important;}width:80px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;border-right:1px solid #faf0ec;}
   .formula-check:active{background:var(--blush);}
   .formula-check.ticked{background:var(--green-light);}
   .formula-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--rose);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;margin-bottom:4px;transition:all 0.2s;}
@@ -146,24 +161,24 @@
         </div>
       </div>
       <div class="card">
-        <div class="meal-block">
-          <div class="meal-top"><span class="meal-icon">&#127749;</span><span class="meal-name">Breakfast</span></div>
-          <textarea class="meal-input" id="meal_breakfast" rows="2" placeholder="e.g. eggs, toast, berries"></textarea>
-          <button class="cat-btn" onclick="categorise('breakfast')">&#10022; Categorise</button>
-          <div class="tags-row" id="tags_breakfast"></div>
-          <div class="missing-row" id="missing_breakfast"></div>
+        <div class="meal-top" style="padding:14px 18px 10px;"><span class="meal-icon">&#127749;</span><span class="meal-name">Breakfast</span></div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','protein')" data-meal="breakfast" data-cat="protein"><div class="formula-box">&#10003;</div><div class="formula-label">&#128170; Protein</div></div>
+          <input class="formula-input" id="meal_breakfast_protein" placeholder="e.g. eggs, yoghurt" oninput="syncMealField('breakfast')">
         </div>
-        <div style="display:flex;gap:0;border-top:1px solid #faf0ec;">
-          <div class="formula-check" onclick="toggleFormula(this,'breakfast','protein')" data-meal="breakfast" data-cat="protein">
-            <div class="formula-box">&#10003;</div><div class="formula-label">💪 Protein</div>
-          </div>
-          <div class="formula-check" onclick="toggleFormula(this,'breakfast','carb')" data-meal="breakfast" data-cat="carb" style="border-left:1px solid #faf0ec;border-right:1px solid #faf0ec;">
-            <div class="formula-box">&#10003;</div><div class="formula-label">🌾 Carb</div>
-          </div>
-          <div class="formula-check" onclick="toggleFormula(this,'breakfast','produce')" data-meal="breakfast" data-cat="produce">
-            <div class="formula-box">&#10003;</div><div class="formula-label">🥦 Produce</div>
-          </div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','carb')" data-meal="breakfast" data-cat="carb"><div class="formula-box">&#10003;</div><div class="formula-label">&#127806; Carb</div></div>
+          <input class="formula-input" id="meal_breakfast_carb" placeholder="e.g. toast, oats" oninput="syncMealField('breakfast')">
         </div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','produce')" data-meal="breakfast" data-cat="produce"><div class="formula-box">&#10003;</div><div class="formula-label">&#129367; Produce</div></div>
+          <input class="formula-input" id="meal_breakfast_produce" placeholder="e.g. berries, spinach" oninput="syncMealField('breakfast')">
+        </div>
+        <div class="meal-row" style="border-bottom:none;">
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','pleasure')" data-meal="breakfast" data-cat="pleasure"><div class="formula-box">&#10003;</div><div class="formula-label">&#10024; Pleasure</div></div>
+          <input class="formula-input" id="meal_breakfast_pleasure" placeholder="e.g. coffee, jam" oninput="syncMealField('breakfast')">
+        </div>
+        <input type="hidden" id="meal_breakfast" value="">
       </div>
     </div>
 
@@ -171,24 +186,24 @@
     <div class="time-block">
       <div class="time-header"><div class="time-dot"></div><div class="time-label">Midday</div></div>
       <div class="card">
-        <div class="meal-block">
-          <div class="meal-top"><span class="meal-icon">&#9728;&#65039;</span><span class="meal-name">Lunch</span></div>
-          <textarea class="meal-input" id="meal_lunch" rows="2" placeholder="e.g. turkey wrap, apple"></textarea>
-          <button class="cat-btn" onclick="categorise('lunch')">&#10022; Categorise</button>
-          <div class="tags-row" id="tags_lunch"></div>
-          <div class="missing-row" id="missing_lunch"></div>
+        <div class="meal-top" style="padding:14px 18px 10px;"><span class="meal-icon">&#9728;&#65039;</span><span class="meal-name">Lunch</span></div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','protein')" data-meal="lunch" data-cat="protein"><div class="formula-box">&#10003;</div><div class="formula-label">&#128170; Protein</div></div>
+          <input class="formula-input" id="meal_lunch_protein" placeholder="e.g. chicken, tuna" oninput="syncMealField('lunch')">
         </div>
-        <div style="display:flex;gap:0;border-top:1px solid #faf0ec;">
-          <div class="formula-check" onclick="toggleFormula(this,'lunch','protein')" data-meal="lunch" data-cat="protein">
-            <div class="formula-box">&#10003;</div><div class="formula-label">💪 Protein</div>
-          </div>
-          <div class="formula-check" onclick="toggleFormula(this,'lunch','carb')" data-meal="lunch" data-cat="carb" style="border-left:1px solid #faf0ec;border-right:1px solid #faf0ec;">
-            <div class="formula-box">&#10003;</div><div class="formula-label">🌾 Carb</div>
-          </div>
-          <div class="formula-check" onclick="toggleFormula(this,'lunch','produce')" data-meal="lunch" data-cat="produce">
-            <div class="formula-box">&#10003;</div><div class="formula-label">🥦 Produce</div>
-          </div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','carb')" data-meal="lunch" data-cat="carb"><div class="formula-box">&#10003;</div><div class="formula-label">&#127806; Carb</div></div>
+          <input class="formula-input" id="meal_lunch_carb" placeholder="e.g. wrap, rice" oninput="syncMealField('lunch')">
         </div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','produce')" data-meal="lunch" data-cat="produce"><div class="formula-box">&#10003;</div><div class="formula-label">&#129367; Produce</div></div>
+          <input class="formula-input" id="meal_lunch_produce" placeholder="e.g. salad, cucumber" oninput="syncMealField('lunch')">
+        </div>
+        <div class="meal-row" style="border-bottom:none;">
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','pleasure')" data-meal="lunch" data-cat="pleasure"><div class="formula-box">&#10003;</div><div class="formula-label">&#10024; Pleasure</div></div>
+          <input class="formula-input" id="meal_lunch_pleasure" placeholder="e.g. crisps, sauce" oninput="syncMealField('lunch')">
+        </div>
+        <input type="hidden" id="meal_lunch" value="">
       </div>
       <div class="card">
         <div class="check-item" onclick="toggleCheck(this)" data-key="protein">
@@ -239,24 +254,24 @@
     <div class="time-block">
       <div class="time-header"><div class="time-dot"></div><div class="time-label">Evening</div></div>
       <div class="card">
-        <div class="meal-block">
-          <div class="meal-top"><span class="meal-icon">&#127769;</span><span class="meal-name">Supper</span></div>
-          <textarea class="meal-input" id="meal_supper" rows="2" placeholder="e.g. salmon, potatoes, green beans"></textarea>
-          <button class="cat-btn" onclick="categorise('supper')">&#10022; Categorise</button>
-          <div class="tags-row" id="tags_supper"></div>
-          <div class="missing-row" id="missing_supper"></div>
+        <div class="meal-top" style="padding:14px 18px 10px;"><span class="meal-icon">&#127769;</span><span class="meal-name">Supper</span></div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'supper','protein')" data-meal="supper" data-cat="protein"><div class="formula-box">&#10003;</div><div class="formula-label">&#128170; Protein</div></div>
+          <input class="formula-input" id="meal_supper_protein" placeholder="e.g. salmon, chicken" oninput="syncMealField('supper')">
         </div>
-        <div style="display:flex;gap:0;border-top:1px solid #faf0ec;">
-          <div class="formula-check" onclick="toggleFormula(this,'supper','protein')" data-meal="supper" data-cat="protein">
-            <div class="formula-box">&#10003;</div><div class="formula-label">💪 Protein</div>
-          </div>
-          <div class="formula-check" onclick="toggleFormula(this,'supper','carb')" data-meal="supper" data-cat="carb" style="border-left:1px solid #faf0ec;border-right:1px solid #faf0ec;">
-            <div class="formula-box">&#10003;</div><div class="formula-label">🌾 Carb</div>
-          </div>
-          <div class="formula-check" onclick="toggleFormula(this,'supper','produce')" data-meal="supper" data-cat="produce">
-            <div class="formula-box">&#10003;</div><div class="formula-label">🥦 Produce</div>
-          </div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'supper','carb')" data-meal="supper" data-cat="carb"><div class="formula-box">&#10003;</div><div class="formula-label">&#127806; Carb</div></div>
+          <input class="formula-input" id="meal_supper_carb" placeholder="e.g. potatoes, rice" oninput="syncMealField('supper')">
         </div>
+        <div class="meal-row">
+          <div class="formula-check" onclick="toggleFormula(this,'supper','produce')" data-meal="supper" data-cat="produce"><div class="formula-box">&#10003;</div><div class="formula-label">&#129367; Produce</div></div>
+          <input class="formula-input" id="meal_supper_produce" placeholder="e.g. green beans, salad" oninput="syncMealField('supper')">
+        </div>
+        <div class="meal-row" style="border-bottom:none;">
+          <div class="formula-check" onclick="toggleFormula(this,'supper','pleasure')" data-meal="supper" data-cat="pleasure"><div class="formula-box">&#10003;</div><div class="formula-label">&#10024; Pleasure</div></div>
+          <input class="formula-input" id="meal_supper_pleasure" placeholder="e.g. dessert, sauce" oninput="syncMealField('supper')">
+        </div>
+        <input type="hidden" id="meal_supper" value="">
       </div>
       <div class="card">
         <div class="check-item" onclick="toggleCheck(this)" data-key="pleasure">
