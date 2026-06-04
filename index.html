@@ -251,11 +251,16 @@
     // Reset form
     checks={};
     document.querySelectorAll('.habit-item').forEach(el=>el.classList.remove('checked'));
-    ['breakfast','lunch','supper'].forEach(m=>{const el=document.getElementById('meal_'+m);if(el)el.value='';});
+    ['breakfast','lunch','supper'].forEach(m=>{
+      const el=document.getElementById('meal_'+m);if(el)el.value='';
+      // Clear category tags
+      const tags=document.getElementById('tags_'+m);if(tags)tags.innerHTML='';
+    });
     document.getElementById('stepsInput').value='';
     document.getElementById('winInput').value='';
     updateSteps(0);
     updateScore();
+    updateWeekBar();
     loadDay(dateStr);
   }
 
@@ -513,6 +518,67 @@
     crisps:'other',chips:'other',sweets:'other',candy:'other',
     jam:'other',spread:'other',syrup:'other',sugar:'other',
     coffee:'other',tea:'other',water:'other',
+    // ADDITIONAL PROTEIN
+    'string cheese':'protein','babybel':'protein','laughing cow':'protein',
+    'deli chicken':'protein','chicken slice':'protein','chicken slices':'protein',
+    'beef jerky':'protein','turkey jerky':'protein','jerky':'protein',
+    'smoked chicken':'protein','canned chicken':'protein',
+    'canned tuna':'protein','canned salmon':'protein','canned sardines':'protein',
+    'fish fingers':'protein','fish cakes':'protein','fishcakes':'protein',
+    'chicken nuggets':'protein','schnitzel':'protein',
+    'meatballs':'protein','meatball':'protein','burger':'protein','burgers':'protein',
+    'sausage roll':'protein','frank':'protein','frankfurter':'protein','hotdog':'protein',
+    'deli meat':'protein','cold cuts':'protein','lunch meat':'protein',
+    'hard boiled':'protein','soft boiled':'protein',
+    'shakshuka':'protein','omelette':'protein','frittata':'protein',
+    'protein fluff':'protein','anabolic ice cream':'protein',
+    'low fat cottage cheese':'protein','fat free cottage cheese':'protein',
+    'goat cheese':'protein','goats cheese':'protein','labneh':'protein',
+    'whipped cottage cheese':'protein',
+    // ADDITIONAL CARBS
+    'pita chips':'carb','pretzels':'carb','pretzel':'carb',
+    'rice cracker':'carb','rice crackers':'carb',
+    'protein oats':'carb','overnight oats':'carb','baked oats':'carb',
+    'french toast':'carb','pancakes':'carb','pancake':'carb','waffle':'carb','waffles':'carb',
+    'muffin':'carb','english muffin':'carb','crumpet':'carb','crumpets':'carb',
+    'croissant':'carb','brioche':'carb','challah':'carb','pita':'carb',
+    'matza':'carb','matzah':'carb','matzo':'carb','crackers':'carb',
+    'popcorn':'carb','corn chips':'carb',
+    'pasta salad':'carb','rice salad':'carb','grain salad':'carb','grain bowl':'carb',
+    'sushi rice':'carb','sushi':'carb','nori':'other',
+    'farro':'carb','spelt':'carb','amaranth':'carb','teff':'carb',
+    'plantain':'carb','yuca':'carb','cassava':'carb',
+    'cereal bar':'carb','granola bar':'carb','oat bar':'carb',
+    'fruit juice':'carb','apple juice':'carb','orange juice':'carb','grape juice':'carb',
+    'smoothie bowl':'carb','acai bowl':'carb','acai':'carb',
+    // ADDITIONAL PRODUCE
+    'mixed leaves':'produce','spring mix':'produce','baby leaves':'produce',
+    'cos lettuce':'produce','romaine':'produce','iceberg':'produce','gem lettuce':'produce',
+    'little gem':'produce','butter lettuce':'produce',
+    'sun dried tomato':'produce','roasted peppers':'produce','roasted tomatoes':'produce',
+    'edamame beans':'produce',
+    'bean sprouts':'produce','beansprouts':'produce','sprouts':'produce',
+    'raw veg':'produce','crudites':'produce','crudités':'produce',
+    'coleslaw':'produce','sauerkraut':'produce','kimchi':'produce',
+    'jalapeño':'produce','jalapeno':'produce','chilli':'produce','chili':'produce',
+    'ginger':'produce','turmeric':'produce','herbs':'produce','basil':'produce',
+    'coriander':'produce','parsley':'produce','dill':'produce','mint':'produce',
+    'lemon':'produce','lime':'produce','orange':'produce',
+    // ADDITIONAL FAT
+    'avocado toast':'fat','guacamole':'fat','guac':'fat',
+    'mixed seeds':'fat','seed mix':'fat',
+    'coconut cream':'fat','coconut milk':'fat',
+    'pine nuts':'fat','sunflower oil':'fat','vegetable oil':'fat',
+    'spread':'fat','margarine':'fat',
+    // MEAL COMBOS (common full meals)
+    'chicken salad':'protein','tuna salad':'protein','egg salad':'protein',
+    'chicken wrap':'protein','tuna wrap':'protein','turkey wrap':'protein',
+    'chicken bowl':'protein','rice bowl':'carb','burrito bowl':'protein',
+    'stir fry':'protein','stir-fry':'protein',
+    'oat porridge':'carb','chia pudding':'fat','chia pot':'fat',
+    'greek salad':'produce','caesar salad':'produce',
+    'soup':'other','chicken soup':'protein','lentil soup':'protein','vegetable soup':'produce',
+    'bone broth':'protein','broth':'protein',
   };
 
   function categorise(meal){
