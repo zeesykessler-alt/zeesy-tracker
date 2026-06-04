@@ -643,23 +643,42 @@
     backgroundColor:'#fdf8f5',scale:2,useCORS:true,logging:false
   }).then(async canvas=>{
     btns.forEach(b=>b.style.display='');
-    canvas.toBlob(async blob=>{
-      const file = new File([blob],'tracker.png',{type:'image/png'});
+    
+    // Create WhatsApp status canvas 1080x1920
+    const statusCanvas = document.createElement('canvas');
+    statusCanvas.width = 1080;
+    statusCanvas.height = 1920;
+    const ctx = statusCanvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#fdf8f5';
+    ctx.fillRect(0, 0, 1080, 1920);
+    
+    // Center the content
+    const scale = Math.min(1000 / canvas.width, 1600 / canvas.height);
+    const w = canvas.width * scale;
+    const h = canvas.height * scale;
+    const x = (1080 - w) / 2;
+    const y = (1920 - h) / 2;
+    ctx.drawImage(canvas, x, y, w, h);
+    
+    statusCanvas.toBlob(async blob=>{
+      const file = new File([blob],'status.png',{type:'image/png'});
       if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
         try{
           await navigator.share({files:[file],title:'My tracker'});
         }catch(e){
           if(e.name!=='AbortError'){
             const link=document.createElement('a');
-            link.download='tracker.png';
-            link.href=canvas.toDataURL('image/png');
+            link.download='status.png';
+            link.href=statusCanvas.toDataURL('image/png');
             link.click();
           }
         }
       } else {
         const link=document.createElement('a');
-        link.download='tracker.png';
-        link.href=canvas.toDataURL('image/png');
+        link.download='status.png';
+        link.href=statusCanvas.toDataURL('image/png');
         link.click();
       }
     },'image/png');
@@ -668,21 +687,7 @@
   });
 }
 
-  function openFeedback(){document.getElementById('feedbackOverlay').classList.add('open');document.getElementById('feedbackText').focus();}
-  function closeFeedback(){document.getElementById('feedbackOverlay').classList.remove('open');document.getElementById('copiedNote').style.display='none';document.getElementById('feedbackText').value='';}
-  function closeFeedbackOutside(e){if(e.target===document.getElementById('feedbackOverlay'))closeFeedback();}
-  function copyFeedback(){
-    const issue=document.getElementById('feedbackText').value.trim();
-    if(!issue)return;
-    const msg='Fix in my daily postpartum tracker: '+issue+'\n\n(This is a bug report from the daily-tracker.html file built in our previous conversation.)';
-    navigator.clipboard.writeText(msg).then(()=>{
-      document.getElementById('copiedNote').style.display='block';
-    }).catch(()=>{
-      const ta=document.createElement('textarea');
-      ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
-      document.getElementById('copiedNote').style.display='block';
-    });
-  }
+
 
   updateScore();loadToday();
 </script>
