@@ -46,6 +46,12 @@
   .meal-input::placeholder{color:#c4a090;font-style:italic;}
   .cat-btn{margin-top:8px;background:none;border:1.5px solid var(--rose);border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--warm);cursor:pointer;font-weight:500;-webkit-tap-highlight-color:transparent;}
   .cat-btn:active{background:var(--blush);}
+  .formula-check{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .formula-check:active{background:var(--blush);}
+  .formula-check.ticked{background:var(--green-light);}
+  .formula-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--rose);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;margin-bottom:4px;transition:all 0.2s;}
+  .formula-check.ticked .formula-box{background:var(--green);border-color:var(--green);color:white;}
+  .formula-label{font-size:10px;color:var(--muted);font-weight:500;text-align:center;}
   .tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
   .tag{border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500;}
   .tag.protein{background:#fde8e8;color:#a04040;}
@@ -142,9 +148,16 @@
           <div class="tags-row" id="tags_breakfast"></div>
           <div class="missing-row" id="missing_breakfast"></div>
         </div>
-        <div id="formula_breakfast" style="padding:0 18px 14px;display:none;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Plate formula</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="formula_pills_breakfast"></div>
+        <div style="display:flex;gap:0;border-top:1px solid #faf0ec;">
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','protein')" data-meal="breakfast" data-cat="protein">
+            <div class="formula-box">&#10003;</div><div class="formula-label">💪 Protein</div>
+          </div>
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','carb')" data-meal="breakfast" data-cat="carb" style="border-left:1px solid #faf0ec;border-right:1px solid #faf0ec;">
+            <div class="formula-box">&#10003;</div><div class="formula-label">🌾 Carb</div>
+          </div>
+          <div class="formula-check" onclick="toggleFormula(this,'breakfast','produce')" data-meal="breakfast" data-cat="produce">
+            <div class="formula-box">&#10003;</div><div class="formula-label">🥦 Produce</div>
+          </div>
         </div>
       </div>
     </div>
@@ -160,9 +173,16 @@
           <div class="tags-row" id="tags_lunch"></div>
           <div class="missing-row" id="missing_lunch"></div>
         </div>
-        <div id="formula_lunch" style="padding:0 18px 14px;display:none;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Plate formula</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="formula_pills_lunch"></div>
+        <div style="display:flex;gap:0;border-top:1px solid #faf0ec;">
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','protein')" data-meal="lunch" data-cat="protein">
+            <div class="formula-box">&#10003;</div><div class="formula-label">💪 Protein</div>
+          </div>
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','carb')" data-meal="lunch" data-cat="carb" style="border-left:1px solid #faf0ec;border-right:1px solid #faf0ec;">
+            <div class="formula-box">&#10003;</div><div class="formula-label">🌾 Carb</div>
+          </div>
+          <div class="formula-check" onclick="toggleFormula(this,'lunch','produce')" data-meal="lunch" data-cat="produce">
+            <div class="formula-box">&#10003;</div><div class="formula-label">🥦 Produce</div>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -221,9 +241,16 @@
           <div class="tags-row" id="tags_supper"></div>
           <div class="missing-row" id="missing_supper"></div>
         </div>
-        <div id="formula_supper" style="padding:0 18px 14px;display:none;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Plate formula</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="formula_pills_supper"></div>
+        <div style="display:flex;gap:0;border-top:1px solid #faf0ec;">
+          <div class="formula-check" onclick="toggleFormula(this,'supper','protein')" data-meal="supper" data-cat="protein">
+            <div class="formula-box">&#10003;</div><div class="formula-label">💪 Protein</div>
+          </div>
+          <div class="formula-check" onclick="toggleFormula(this,'supper','carb')" data-meal="supper" data-cat="carb" style="border-left:1px solid #faf0ec;border-right:1px solid #faf0ec;">
+            <div class="formula-box">&#10003;</div><div class="formula-label">🌾 Carb</div>
+          </div>
+          <div class="formula-check" onclick="toggleFormula(this,'supper','produce')" data-meal="supper" data-cat="produce">
+            <div class="formula-box">&#10003;</div><div class="formula-label">🥦 Produce</div>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -285,7 +312,9 @@
     document.getElementById('dayPicker').value = dateStr;
     // Reset form
     checks={};
+    formulaChecks={};
     document.querySelectorAll('.habit-item').forEach(el=>el.classList.remove('checked'));
+    document.querySelectorAll('.formula-check').forEach(el=>el.classList.remove('ticked'));
     ['breakfast','lunch','supper'].forEach(m=>{
       const el=document.getElementById('meal_'+m);if(el)el.value='';
       // Clear category tags
@@ -444,6 +473,26 @@
     const msgs=['','keep going!','doing great!','halfway there!','almost there!','crushing it! \uD83C\uDF89'];
     const pillEl=document.getElementById('scorePill');
     if(pillEl) pillEl.textContent=n+' habits \u2713';
+  }
+
+  let formulaChecks = {}; // {breakfast_protein: true, lunch_carb: false, ...}
+
+  function toggleFormula(el, meal, cat) {
+    const key = meal+'_'+cat;
+    const ticked = el.classList.toggle('ticked');
+    formulaChecks[key] = ticked;
+  }
+
+  function autoTickFormula(meal, found) {
+    ['protein','carb','produce'].forEach(cat=>{
+      const key = meal+'_'+cat;
+      const el = document.querySelector(`.formula-check[data-meal="${meal}"][data-cat="${cat}"]`);
+      if(!el) return;
+      if(found[cat] && found[cat].length > 0){
+        el.classList.add('ticked');
+        formulaChecks[key] = true;
+      }
+    });
   }
 
   function toggleCheck(el){
@@ -809,6 +858,9 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
       });
     }
 
+    // Auto-tick formula boxes based on what was found
+    autoTickFormula(meal, found);
+
     // Warnings
     const strongProteinKeys=['egg','eggs','chicken','turkey','salmon','tuna','fish','beef','lamb',
       'mince','steak','shrimp','prawns','prawn','greek yogurt','greek yoghurt','cottage cheese',
@@ -867,7 +919,9 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     const entry={
       date:activeKey,
       dateLabel:new Date(activeKey).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
-      checks:{...checks},score:Object.values(checks).filter(Boolean).length,
+      checks:{...checks},
+      formulaChecks:{...formulaChecks},
+      score:Object.values(checks).filter(Boolean).length,
       meals:{breakfast:document.getElementById('meal_breakfast').value,lunch:document.getElementById('meal_lunch').value,supper:document.getElementById('meal_supper').value},
       steps:document.getElementById('stepsInput').value||'0',
       win:document.getElementById('winInput').value
@@ -883,7 +937,16 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     const e = allData[dateStr];
     if(!e){ updateScore(); showToast(''); return; }
     checks=e.checks||{};
+    formulaChecks=e.formulaChecks||{};
     Object.entries(checks).forEach(([k,v])=>{if(v)document.querySelector('[data-key="'+k+'"]')?.classList.add('checked');});
+    // Restore formula ticks
+    Object.entries(formulaChecks).forEach(([k,v])=>{
+      if(v){
+        const [meal,cat]=k.split('_');
+        const el=document.querySelector(`.formula-check[data-meal="${meal}"][data-cat="${cat}"]`);
+        if(el)el.classList.add('ticked');
+      }
+    });
     if(e.meals){['breakfast','lunch','supper'].forEach(m=>{const el=document.getElementById('meal_'+m);if(el&&e.meals[m])el.value=e.meals[m];});}
     if(e.steps){document.getElementById('stepsInput').value=e.steps;updateSteps(e.steps);}
     if(e.win)document.getElementById('winInput').value=e.win;
