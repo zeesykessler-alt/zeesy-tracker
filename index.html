@@ -581,7 +581,7 @@
     'bone broth':'protein','broth':'protein',
   };
 
-  function categorise(meal){
+  async function categorise(meal){
     const raw=document.getElementById('meal_'+meal).value.trim();
     if(!raw)return;
     const input=raw.toLowerCase();
@@ -589,49 +589,85 @@
     const missingEl=document.getElementById('missing_'+meal);
     tagsEl.innerHTML='';missingEl.innerHTML='';
 
+    // Show loading state
+    const loadTag=document.createElement('span');
+    loadTag.className='tag other';
+    loadTag.textContent='Categorising...';
+    tagsEl.appendChild(loadTag);
+
     const tokens=input.split(/[,+\/\n]+/).map(t=>t.trim()).filter(Boolean);
+
+    // First pass: local dictionary
     const found={protein:[],carb:[],produce:[],fat:[],other:[]};
+    const unmatched=[];
     const sortedKeys=Object.keys(foodMap).sort((a,b)=>b.length-a.length);
     const lowProteinFound=[];
 
     tokens.forEach(token=>{
-      // Strip noise words
       let cleaned=token;
       flavourNoise.forEach(noise=>{cleaned=cleaned.replace(new RegExp('\\b'+noise+'\\b','g'),' ');});
       cleaned=cleaned.replace(/\s+/g,' ').trim();
-
       let matched=false;
-      // Try full cleaned token, then full original
       for(const key of sortedKeys){
         if(cleaned.includes(key)||token.includes(key)){
           found[foodMap[key]].push(token);
-          // Check if it's a low-protein source
           if(foodMap[key]==='protein'){
             const isLow=lowProteinSources.some(lp=>token.includes(lp)||cleaned.includes(lp));
             if(isLow)lowProteinFound.push(token);
           }
-          matched=true;
-          break;
+          matched=true;break;
         }
       }
-      // Word-by-word fallback
       if(!matched){
         const words=cleaned.split(/\s+/);
         for(const word of words){
           if(word.length<3)continue;
           for(const key of sortedKeys){
             if(word===key||word.startsWith(key)){
-              found[foodMap[key]].push(token);
-              matched=true;
-              break;
+              found[foodMap[key]].push(token);matched=true;break;
             }
           }
           if(matched)break;
         }
       }
-      if(!matched)found.other.push(token);
+      if(!matched)unmatched.push(token);
     });
 
+    // Second pass: send unmatched to Claude API
+    if(unmatched.length>0){
+      try{
+        const prompt=`Categorise each of these foods into exactly one of: protein, carb, produce, fat, other.
+Foods: ${unmatched.join(', ')}
+Reply ONLY with valid JSON like: {"food name":"category","food name":"category"}
+Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starchy veg, produce=non-starchy veg/salad, fat=oils/nuts/nut butter/avocado, other=condiments/treats/drinks`;
+
+        const resp=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            model:'claude-sonnet-4-20250514',
+            max_tokens:300,
+            messages:[{role:'user',content:prompt}]
+          })
+        });
+        const data=await resp.json();
+        const text=data.content?.[0]?.text||'{}';
+        const json=JSON.parse(text.replace(/```json|```/g,'').trim());
+        Object.entries(json).forEach(([food,cat])=>{
+          const validCat=['protein','carb','produce','fat','other'].includes(cat)?cat:'other';
+          // Find the matching unmatched token
+          const match=unmatched.find(u=>u.includes(food.toLowerCase())||food.toLowerCase().includes(u))||food;
+          found[validCat].push(match);
+          unmatched.splice(unmatched.indexOf(match),1);
+        });
+      }catch(e){
+        // If API fails, put unmatched in other
+        unmatched.forEach(u=>found.other.push(u));
+      }
+    }
+
+    // Render tags
+    tagsEl.innerHTML='';
     const icons={protein:'Protein',carb:'Carb',produce:'Produce',fat:'Fat',other:'Other'};
     Object.entries(found).forEach(([cat,items])=>{
       items.forEach(item=>{
@@ -642,31 +678,23 @@
       });
     });
 
-    // Strong protein sources — if any of these are present, don't show low-protein warning
+    // Warnings
     const strongProteinKeys=['egg','eggs','chicken','turkey','salmon','tuna','fish','beef','lamb',
       'mince','steak','shrimp','prawns','prawn','greek yogurt','greek yoghurt','cottage cheese',
       'skyr','kefir','quark','protein shake','protein powder','protein bar','protein cereal',
       'tofu','tempeh','halloumi','cheese','cheddar','mozzarella','feta','gouda','parmesan'];
-
     const hasStrongProtein=strongProteinKeys.some(k=>input.includes(k));
-
-    // Missing plate components
     const missing=[];
     if(!found.protein.length)missing.push({text:'No protein \u2014 add eggs, cottage cheese or a protein shake',warn:true});
     if(!found.carb.length)missing.push({text:'No carb spotted',warn:true});
     if(!found.produce.length)missing.push({text:'No produce spotted',warn:false});
-
-    // Only warn about low protein if there's NO strong protein source alongside it
-    if(lowProteinFound.length && found.protein.length && !hasStrongProtein){
+    if(lowProteinFound.length&&found.protein.length&&!hasStrongProtein){
       missing.push({text:'Low-protein source spotted \u2014 pair with eggs, cottage cheese or protein powder to hit 25\u201335g',warn:true});
     }
-
-    // Smoothie tip — only if no strong protein present
     const hasSmoothie=input.includes('smoothie')||input.includes('berry mix')||input.includes('oat milk');
-    if(hasSmoothie && !hasStrongProtein && !found.protein.length){
+    if(hasSmoothie&&!hasStrongProtein&&!found.protein.length){
       missing.push({text:'Smoothie tip: add protein powder, Greek yoghurt or cottage cheese on the side to reach 25\u201335g protein',warn:true});
     }
-
     missing.forEach(m=>{
       const tag=document.createElement('span');
       tag.className='missing-tag';
