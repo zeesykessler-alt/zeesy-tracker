@@ -568,6 +568,42 @@
     }
   }
 
+  const _apiTimers = {};
+  function scheduleApiValidation(meal, cat, value) {
+    const key = meal + '_' + cat;
+    clearTimeout(_apiTimers[key]);
+    if (!value.trim()) return;
+    _apiTimers[key] = setTimeout(() => _apiValidateField(meal, cat, value), 600);
+  }
+  async function _apiValidateField(meal, cat, value) {
+    const flagId = 'flag_' + meal + '_' + cat;
+    if (document.getElementById(flagId)) return;
+    const catLabels = {protein:'protein box (meat/fish/eggs/dairy/legumes)',carb:'carb box (grains/bread/fruit/starchy veg — fruit is always carb, potatoes/corn/peas are carbs)',produce:'produce box (non-starchy veg/salad/greens only)',pleasure:'pleasure box (anything enjoyable — jam/chocolate/sauce/condiments)'};
+    const prompt = `Lauren Parker plate formula: protein=meat/fish/eggs/dairy/legumes/cheese/yoghurt, carb=grains/bread/fruit/starchy veg (potatoes/corn/peas/sweet potato), produce=non-starchy veg/salad/greens only, pleasure=anything enjoyable (jam/chocolate/sauce/condiments/treats).\nUser put "${value}" in the ${catLabels[cat]||cat}.\nIs this correct?\nReply ONLY with JSON: {"correct":true} or {"correct":false,"belongs":"category","message":"one short friendly sentence"}`;
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+        body: JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:80,messages:[{role:'user',content:prompt}]})
+      });
+      const d = await r.json();
+      const txt = d.content?.[0]?.text || '{"correct":true}';
+      const res = JSON.parse(txt.replace(/```json|```/g,'').trim());
+      if (!res.correct && res.message) {
+        const inputEl = document.getElementById('meal_'+meal+'_'+cat);
+        if (!inputEl) return;
+        let flag = document.getElementById(flagId);
+        if (!flag) {
+          flag = document.createElement('div');
+          flag.id = flagId;
+          flag.style.cssText = 'font-size:11px;color:#c97070;background:#fff0f0;border:1px dashed #e8b0b0;border-radius:6px;padding:4px 8px;margin:2px 12px 4px;line-height:1.4;';
+          inputEl.parentNode.insertBefore(flag, inputEl.nextSibling);
+        }
+        flag.innerHTML = '⚠ ' + res.message;
+      }
+    } catch(e) { /* API unavailable or CORS — Layer 1 only */ }
+  }
+
   function syncMealField(meal, cat) {
     // Combine all four fields into the hidden meal input for saving
     const parts = ['protein','carb','produce','pleasure'].map(c => {
@@ -580,6 +616,7 @@
     if(cat) {
       const val = document.getElementById('meal_'+meal+'_'+cat)?.value || '';
       validateField(meal, cat, val);
+      scheduleApiValidation(meal, cat, val);
     }
   }
 
