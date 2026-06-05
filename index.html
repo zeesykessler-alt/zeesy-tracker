@@ -47,7 +47,7 @@
   .cat-btn{margin-top:8px;background:none;border:1.5px solid var(--rose);border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--warm);cursor:pointer;font-weight:500;-webkit-tap-highlight-color:transparent;}
   .cat-btn:active{background:var(--blush);}
   .meal-row{display:flex;align-items:center;border-bottom:1px solid #f0e8e4;}
-  .formula-input{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);padding:12px 14px;outline:none;min-width:0;}
+  .formula-input{flex:1;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);padding:12px 14px;outline:none;min-width:0;overflow:hidden;text-overflow:ellipsis;}
   .formula-input::placeholder{color:#b89080;}
   .formula-check{width:76px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;border-right:1px solid #f0e8e4;}
   .formula-check:active{background:var(--blush);}
@@ -164,19 +164,19 @@
         <div class="meal-top" style="padding:14px 18px 10px;"><span class="meal-icon">&#127749;</span><span class="meal-name">Breakfast</span></div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'breakfast','protein')" data-meal="breakfast" data-cat="protein"><div class="formula-box">&#10003;</div><div class="formula-label">&#128170; Protein</div></div>
-          <input class="formula-input" id="meal_breakfast_protein" placeholder="e.g. eggs, yoghurt" oninput="syncMealField('breakfast')">
+          <input class="formula-input" id="meal_breakfast_protein" placeholder="e.g. eggs, yoghurt" oninput="syncMealField('breakfast','protein')">
         </div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'breakfast','carb')" data-meal="breakfast" data-cat="carb"><div class="formula-box">&#10003;</div><div class="formula-label">&#127806; Carb</div></div>
-          <input class="formula-input" id="meal_breakfast_carb" placeholder="e.g. toast, oats" oninput="syncMealField('breakfast')">
+          <input class="formula-input" id="meal_breakfast_carb" placeholder="e.g. toast, oats" oninput="syncMealField('breakfast','carb')">
         </div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'breakfast','produce')" data-meal="breakfast" data-cat="produce"><div class="formula-box">&#10003;</div><div class="formula-label">&#129367; Produce</div></div>
-          <input class="formula-input" id="meal_breakfast_produce" placeholder="e.g. berries, spinach" oninput="syncMealField('breakfast')">
+          <input class="formula-input" id="meal_breakfast_produce" placeholder="e.g. berries, spinach" oninput="syncMealField('breakfast','produce')">
         </div>
         <div class="meal-row" style="border-bottom:none;">
           <div class="formula-check" onclick="toggleFormula(this,'breakfast','pleasure')" data-meal="breakfast" data-cat="pleasure"><div class="formula-box">&#10003;</div><div class="formula-label">&#10024; Pleasure</div></div>
-          <input class="formula-input" id="meal_breakfast_pleasure" placeholder="e.g. coffee, jam" oninput="syncMealField('breakfast')">
+          <input class="formula-input" id="meal_breakfast_pleasure" placeholder="e.g. coffee, jam" oninput="syncMealField('breakfast','pleasure')">
         </div>
         <input type="hidden" id="meal_breakfast" value="">
       </div>
@@ -189,19 +189,19 @@
         <div class="meal-top" style="padding:14px 18px 10px;"><span class="meal-icon">&#9728;&#65039;</span><span class="meal-name">Lunch</span></div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'lunch','protein')" data-meal="lunch" data-cat="protein"><div class="formula-box">&#10003;</div><div class="formula-label">&#128170; Protein</div></div>
-          <input class="formula-input" id="meal_lunch_protein" placeholder="e.g. chicken, tuna" oninput="syncMealField('lunch')">
+          <input class="formula-input" id="meal_lunch_protein" placeholder="e.g. chicken, tuna" oninput="syncMealField('lunch','protein')">
         </div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'lunch','carb')" data-meal="lunch" data-cat="carb"><div class="formula-box">&#10003;</div><div class="formula-label">&#127806; Carb</div></div>
-          <input class="formula-input" id="meal_lunch_carb" placeholder="e.g. wrap, rice" oninput="syncMealField('lunch')">
+          <input class="formula-input" id="meal_lunch_carb" placeholder="e.g. wrap, rice" oninput="syncMealField('lunch','carb')">
         </div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'lunch','produce')" data-meal="lunch" data-cat="produce"><div class="formula-box">&#10003;</div><div class="formula-label">&#129367; Produce</div></div>
-          <input class="formula-input" id="meal_lunch_produce" placeholder="e.g. salad, cucumber" oninput="syncMealField('lunch')">
+          <input class="formula-input" id="meal_lunch_produce" placeholder="e.g. salad, cucumber" oninput="syncMealField('lunch','produce')">
         </div>
         <div class="meal-row" style="border-bottom:none;">
           <div class="formula-check" onclick="toggleFormula(this,'lunch','pleasure')" data-meal="lunch" data-cat="pleasure"><div class="formula-box">&#10003;</div><div class="formula-label">&#10024; Pleasure</div></div>
-          <input class="formula-input" id="meal_lunch_pleasure" placeholder="e.g. crisps, sauce" oninput="syncMealField('lunch')">
+          <input class="formula-input" id="meal_lunch_pleasure" placeholder="e.g. crisps, sauce" oninput="syncMealField('lunch','pleasure')">
         </div>
         <input type="hidden" id="meal_lunch" value="">
       </div>
@@ -257,19 +257,19 @@
         <div class="meal-top" style="padding:14px 18px 10px;"><span class="meal-icon">&#127769;</span><span class="meal-name">Supper</span></div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'supper','protein')" data-meal="supper" data-cat="protein"><div class="formula-box">&#10003;</div><div class="formula-label">&#128170; Protein</div></div>
-          <input class="formula-input" id="meal_supper_protein" placeholder="e.g. salmon, chicken" oninput="syncMealField('supper')">
+          <input class="formula-input" id="meal_supper_protein" placeholder="e.g. salmon, chicken" oninput="syncMealField('supper','protein')">
         </div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'supper','carb')" data-meal="supper" data-cat="carb"><div class="formula-box">&#10003;</div><div class="formula-label">&#127806; Carb</div></div>
-          <input class="formula-input" id="meal_supper_carb" placeholder="e.g. potatoes, rice" oninput="syncMealField('supper')">
+          <input class="formula-input" id="meal_supper_carb" placeholder="e.g. potatoes, rice" oninput="syncMealField('supper','carb')">
         </div>
         <div class="meal-row">
           <div class="formula-check" onclick="toggleFormula(this,'supper','produce')" data-meal="supper" data-cat="produce"><div class="formula-box">&#10003;</div><div class="formula-label">&#129367; Produce</div></div>
-          <input class="formula-input" id="meal_supper_produce" placeholder="e.g. green beans, salad" oninput="syncMealField('supper')">
+          <input class="formula-input" id="meal_supper_produce" placeholder="e.g. green beans, salad" oninput="syncMealField('supper','produce')">
         </div>
         <div class="meal-row" style="border-bottom:none;">
           <div class="formula-check" onclick="toggleFormula(this,'supper','pleasure')" data-meal="supper" data-cat="pleasure"><div class="formula-box">&#10003;</div><div class="formula-label">&#10024; Pleasure</div></div>
-          <input class="formula-input" id="meal_supper_pleasure" placeholder="e.g. dessert, sauce" oninput="syncMealField('supper')">
+          <input class="formula-input" id="meal_supper_pleasure" placeholder="e.g. dessert, sauce" oninput="syncMealField('supper','pleasure')">
         </div>
         <input type="hidden" id="meal_supper" value="">
       </div>
@@ -394,7 +394,7 @@
     const phases = [
       {
         days:7, label:'Week 1', title:'This week: eat breakfast',
-        sub:'One habit only — eat breakfast within an hour of waking, that's the whole task',
+        sub:'One habit only — eat breakfast within an hour of waking, that\'s the whole task',
         walk:'Walk 5–10 minutes today — just start',
         stepsHint:'Week 1 goal: just move. Even 5 minutes counts.',
         showSnack:false, showStrength:false, showCarbs:false,
@@ -498,14 +498,93 @@
 
   let formulaChecks = {};
 
-  function syncMealField(meal) {
+  // Foods that belong in a DIFFERENT box than where they're commonly put
+  // format: {keyword: {belongs: 'correct_cat', msg: 'explanation'}}
+  const misfits = {
+    // Fruit — carb not produce
+    'apple':      {belongs:'carb', msg:'🍎 Fruit is a carb, not produce — move to carb box'},
+    'banana':     {belongs:'carb', msg:'🍌 Fruit is a carb, not produce — move to carb box'},
+    'berries':    {belongs:'carb', msg:'🍓 Berries are a carb, not produce — move to carb box'},
+    'blueberries':{belongs:'carb', msg:'🫐 Berries are a carb, not produce — move to carb box'},
+    'strawberries':{belongs:'carb',msg:'🍓 Berries are a carb, not produce — move to carb box'},
+    'raspberries':{belongs:'carb', msg:'🍓 Berries are a carb, not produce — move to carb box'},
+    'grapes':     {belongs:'carb', msg:'🍇 Fruit is a carb, not produce — move to carb box'},
+    'mango':      {belongs:'carb', msg:'🥭 Fruit is a carb, not produce — move to carb box'},
+    'orange':     {belongs:'carb', msg:'🍊 Fruit is a carb, not produce — move to carb box'},
+    'watermelon': {belongs:'carb', msg:'🍉 Fruit is a carb, not produce — move to carb box'},
+    'melon':      {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    'peach':      {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    'pear':       {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    'plum':       {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    'cherry':     {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    'cherries':   {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    'fruit':      {belongs:'carb', msg:'🍓 Fruit is a carb, not produce — move to carb box'},
+    'mixed fruit':{belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
+    // Starchy veg — carb not produce
+    'potatoes':   {belongs:'carb', msg:'🥔 Potatoes are a carb, not produce — move to carb box'},
+    'potato':     {belongs:'carb', msg:'🥔 Potatoes are a carb, not produce — move to carb box'},
+    'sweet potato':{belongs:'carb',msg:'🍠 Sweet potato is a carb, not produce — move to carb box'},
+    'corn':       {belongs:'carb', msg:'🌽 Corn is a carb, not produce — move to carb box'},
+    'peas':       {belongs:'carb', msg:'Peas are a carb, not produce — move to carb box'},
+    // Cheese / yoghurt — protein not fat
+    'cheese':     {belongs:'protein', msg:'🧀 Cheese counts as protein here — move to protein box'},
+    'cheddar':    {belongs:'protein', msg:'🧀 Cheese is protein — move to protein box'},
+    'feta':       {belongs:'protein', msg:'Feta is protein — move to protein box'},
+    'halloumi':   {belongs:'protein', msg:'Halloumi is protein — move to protein box'},
+    'mozzarella': {belongs:'protein', msg:'Mozzarella is protein — move to protein box'},
+    'greek yoghurt':{belongs:'protein',msg:'Greek yoghurt is protein — move to protein box'},
+    'greek yogurt':{belongs:'protein',msg:'Greek yoghurt is protein — move to protein box'},
+    'yoghurt':    {belongs:'protein', msg:'Yoghurt counts as protein — move to protein box'},
+    'yogurt':     {belongs:'protein', msg:'Yoghurt counts as protein — move to protein box'},
+    'cottage cheese':{belongs:'protein',msg:'Cottage cheese is protein — move to protein box'},
+    // Avocado / nuts — fat not produce
+    'avocado':    {belongs:'fat', msg:'Avocado is a fat, not produce — Lauren counts it as fat'},
+    'nuts':       {belongs:'fat', msg:'Nuts are a fat — move to fat box'},
+    'almonds':    {belongs:'fat', msg:'Almonds are a fat — move to fat box'},
+    'peanut butter':{belongs:'fat',msg:'Peanut butter is a fat — move to fat box'},
+    'hummus':     {belongs:'fat', msg:'Hummus is a fat — move to fat box'},
+  };
+
+  function validateField(meal, cat, value) {
+    const input = value.toLowerCase().trim();
+    if(!input) return;
+    const flagId = 'flag_'+meal+'_'+cat;
+    let existing = document.getElementById(flagId);
+
+    const flags = [];
+    Object.entries(misfits).forEach(([keyword, info]) => {
+      if(input.includes(keyword) && info.belongs !== cat) {
+        flags.push(info.msg);
+      }
+    });
+
+    if(flags.length > 0) {
+      if(!existing) {
+        existing = document.createElement('div');
+        existing.id = flagId;
+        existing.style.cssText = 'font-size:11px;color:#c97070;background:#fff0f0;border:1px dashed #e8b0b0;border-radius:6px;padding:4px 8px;margin:2px 12px 4px;line-height:1.4;';
+        const inputEl = document.getElementById('meal_'+meal+'_'+cat);
+        if(inputEl) inputEl.parentNode.insertBefore(existing, inputEl.nextSibling);
+      }
+      existing.innerHTML = flags.join('<br>');
+    } else if(existing) {
+      existing.remove();
+    }
+  }
+
+  function syncMealField(meal, cat) {
     // Combine all four fields into the hidden meal input for saving
-    const parts = ['protein','carb','produce','pleasure'].map(cat => {
-      const val = document.getElementById('meal_'+meal+'_'+cat)?.value?.trim();
-      return val ? cat+': '+val : '';
+    const parts = ['protein','carb','produce','pleasure'].map(c => {
+      const val = document.getElementById('meal_'+meal+'_'+c)?.value?.trim();
+      return val ? c+': '+val : '';
     }).filter(Boolean);
     const hidden = document.getElementById('meal_'+meal);
     if(hidden) hidden.value = parts.join(' | ');
+    // Run validation on the field that changed
+    if(cat) {
+      const val = document.getElementById('meal_'+meal+'_'+cat)?.value || '';
+      validateField(meal, cat, val);
+    }
   }
 
   function setMealFields(meal, value) {
