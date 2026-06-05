@@ -929,26 +929,15 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     });
   }
 
-  // ── PERSISTENT STORAGE — uses window.storage API (persists across sessions) ──
+  // ── PERSISTENT STORAGE ──
   let allData = {};
 
-  async function loadData() {
-    try {
-      const result = await window.storage.get('pp_daily');
-      return result ? JSON.parse(result.value) : {};
-    } catch(e) {
-      // Key doesn't exist yet or fallback to localStorage
-      return JSON.parse(localStorage.getItem('pp_daily') || '{}');
-    }
+  function loadData(){
+    try{const d=localStorage.getItem('pp_daily');return d?JSON.parse(d):{};}catch(e){return {};}
   }
 
-  async function saveData(entries) {
-    localStorage.setItem('pp_daily', JSON.stringify(entries));
-    try {
-      await window.storage.set('pp_daily', JSON.stringify(entries));
-    } catch(e) {
-      console.warn('Storage save failed, saved locally only:', e);
-    }
+  function saveData(data){
+    try{localStorage.setItem('pp_daily',JSON.stringify(data));}catch(e){}
   }
 
   function switchTab(tab){
@@ -958,7 +947,7 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     if(tab==='history')renderHistory();
   }
 
-  async function saveDay(){
+  function saveDay(){
     const entry={
       date:activeKey,
       dateLabel:new Date(activeKey).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
@@ -971,12 +960,12 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     };
     showToast('Saving... \u23F3');
     allData[activeKey] = entry;
-    await saveData(allData);
+    saveData(allData);
     showToast('Saved! Well done today \uD83C\uDF38');
   }
 
-  async function loadDay(dateStr){
-    allData = await loadData();
+  function loadDay(dateStr){
+    allData = loadData();
     const e = allData[dateStr];
     if(!e){ updateScore(); showToast(''); return; }
     checks=e.checks||{};
@@ -997,9 +986,9 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     showToast('');
   }
 
-  async function loadToday(){
+  function loadToday(){
     showToast('Loading... \u23F3');
-    await loadDay(activeKey);
+    loadDay(activeKey);
   }
 
   function renderHistory(){
@@ -1034,6 +1023,15 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
 
 
 
+
+  function openFeedback(){document.getElementById('feedbackOverlay').style.display='flex';}
+  function closeFeedback(){document.getElementById('feedbackOverlay').style.display='none';}
+  function closeFeedbackOutside(e){if(e.target===document.getElementById('feedbackOverlay'))closeFeedback();}
+  function copyFeedback(){
+    const t=document.getElementById('feedbackText').value;
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>showToast('Copied!'));}
+    else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Copied!');}
+  }
 
   updateScore();loadToday();
 </script>
