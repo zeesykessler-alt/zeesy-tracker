@@ -497,48 +497,44 @@
   // Foods that belong in a DIFFERENT box than where they're commonly put
   // format: {keyword: {belongs: 'correct_cat', msg: 'explanation'}}
   const misfits = {
-    // Fruit — carb not produce
-    'apple':      {belongs:'carb', msg:'🍎 Fruit is a carb, not produce — move to carb box'},
-    'banana':     {belongs:'carb', msg:'🍌 Fruit is a carb, not produce — move to carb box'},
-    'berries':    {belongs:'carb', msg:'🍓 Berries are a carb, not produce — move to carb box'},
-    'blueberries':{belongs:'carb', msg:'🫐 Berries are a carb, not produce — move to carb box'},
-    'strawberries':{belongs:'carb',msg:'🍓 Berries are a carb, not produce — move to carb box'},
-    'raspberries':{belongs:'carb', msg:'🍓 Berries are a carb, not produce — move to carb box'},
-    'grapes':     {belongs:'carb', msg:'🍇 Fruit is a carb, not produce — move to carb box'},
-    'mango':      {belongs:'carb', msg:'🥭 Fruit is a carb, not produce — move to carb box'},
-    'orange':     {belongs:'carb', msg:'🍊 Fruit is a carb, not produce — move to carb box'},
-    'watermelon': {belongs:'carb', msg:'🍉 Fruit is a carb, not produce — move to carb box'},
-    'melon':      {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    'peach':      {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    'pear':       {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    'plum':       {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    'cherry':     {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    'cherries':   {belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    'fruit':      {belongs:'carb', msg:'🍓 Fruit is a carb, not produce — move to carb box'},
-    'mixed fruit':{belongs:'carb', msg:'Fruit is a carb, not produce — move to carb box'},
-    // Starchy veg — carb not produce
-    'potatoes':   {belongs:'carb', msg:'🥔 Potatoes are a carb, not produce — move to carb box'},
-    'potato':     {belongs:'carb', msg:'🥔 Potatoes are a carb, not produce — move to carb box'},
-    'sweet potato':{belongs:'carb',msg:'🍠 Sweet potato is a carb, not produce — move to carb box'},
-    'corn':       {belongs:'carb', msg:'🌽 Corn is a carb, not produce — move to carb box'},
-    'peas':       {belongs:'carb', msg:'Peas are a carb, not produce — move to carb box'},
-    // Cheese / yoghurt — protein not fat
-    'cheese':     {belongs:'protein', msg:'🧀 Cheese counts as protein here — move to protein box'},
-    'cheddar':    {belongs:'protein', msg:'🧀 Cheese is protein — move to protein box'},
-    'feta':       {belongs:'protein', msg:'Feta is protein — move to protein box'},
-    'halloumi':   {belongs:'protein', msg:'Halloumi is protein — move to protein box'},
-    'mozzarella': {belongs:'protein', msg:'Mozzarella is protein — move to protein box'},
-    'greek yoghurt':{belongs:'protein',msg:'Greek yoghurt is protein — move to protein box'},
-    'greek yogurt':{belongs:'protein',msg:'Greek yoghurt is protein — move to protein box'},
-    'yoghurt':    {belongs:'protein', msg:'Yoghurt counts as protein — move to protein box'},
-    'yogurt':     {belongs:'protein', msg:'Yoghurt counts as protein — move to protein box'},
-    'cottage cheese':{belongs:'protein',msg:'Cottage cheese is protein — move to protein box'},
-    // Avocado / nuts — fat not produce
-    'avocado':    {belongs:'fat', msg:'Avocado is a fat, not produce — Lauren counts it as fat'},
-    'nuts':       {belongs:'fat', msg:'Nuts are a fat — move to fat box'},
-    'almonds':    {belongs:'fat', msg:'Almonds are a fat — move to fat box'},
-    'peanut butter':{belongs:'fat',msg:'Peanut butter is a fat — move to fat box'},
-    'hummus':     {belongs:'fat', msg:'Hummus is a fat — move to fat box'},
+    'apple':        {belongs:'carb',    msg:'🍎 Fruit goes in the carb box'},
+    'banana':       {belongs:'carb',    msg:'🍌 Fruit goes in the carb box'},
+    'berries':      {belongs:'carb',    msg:'🍓 Berries go in the carb box'},
+    'blueberries':  {belongs:'carb',    msg:'🫐 Berries go in the carb box'},
+    'strawberries': {belongs:'carb',    msg:'🍓 Berries go in the carb box'},
+    'raspberries':  {belongs:'carb',    msg:'🍓 Berries go in the carb box'},
+    'grapes':       {belongs:'carb',    msg:'🍇 Fruit goes in the carb box'},
+    'mango':        {belongs:'carb',    msg:'🥭 Fruit goes in the carb box'},
+    'orange':       {belongs:'carb',    msg:'🍊 Fruit goes in the carb box'},
+    'watermelon':   {belongs:'carb',    msg:'🍉 Fruit goes in the carb box'},
+    'melon':        {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'peach':        {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'pear':         {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'plum':         {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'cherry':       {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'cherries':     {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'fruit':        {belongs:'carb',    msg:'🍓 Fruit goes in the carb box'},
+    'mixed fruit':  {belongs:'carb',    msg:'Fruit goes in the carb box'},
+    'potatoes':     {belongs:'carb',    msg:'🥔 Potatoes go in the carb box'},
+    'potato':       {belongs:'carb',    msg:'🥔 Potato goes in the carb box'},
+    'sweet potato': {belongs:'carb',    msg:'🍠 Sweet potato goes in the carb box'},
+    'corn':         {belongs:'carb',    msg:'🌽 Corn goes in the carb box'},
+    'peas':         {belongs:'carb',    msg:'Peas go in the carb box'},
+    'cheese':       {belongs:'protein', msg:'🧀 Cheese counts as protein — put it in the protein box'},
+    'cheddar':      {belongs:'protein', msg:'🧀 Cheddar is protein — put it in the protein box'},
+    'feta':         {belongs:'protein', msg:'Feta is protein — put it in the protein box'},
+    'halloumi':     {belongs:'protein', msg:'Halloumi is protein — put it in the protein box'},
+    'mozzarella':   {belongs:'protein', msg:'Mozzarella is protein — put it in the protein box'},
+    'greek yoghurt':{belongs:'protein', msg:'Greek yoghurt is protein — put it in the protein box'},
+    'greek yogurt': {belongs:'protein', msg:'Greek yoghurt is protein — put it in the protein box'},
+    'yoghurt':      {belongs:'protein', msg:'Yoghurt counts as protein — put it in the protein box'},
+    'yogurt':       {belongs:'protein', msg:'Yoghurt counts as protein — put it in the protein box'},
+    'cottage cheese':{belongs:'protein',msg:'Cottage cheese is protein — put it in the protein box'},
+    'avocado':      {belongs:'pleasure',msg:'Avocado is a fat — Lauren puts it in the pleasure box'},
+    'nuts':         {belongs:'pleasure',msg:'Nuts are a fat — put them in the pleasure box'},
+    'almonds':      {belongs:'pleasure',msg:'Almonds are a fat — put them in the pleasure box'},
+    'peanut butter':{belongs:'pleasure',msg:'Peanut butter is a fat — put it in the pleasure box'},
+    'hummus':       {belongs:'pleasure',msg:'Hummus is a fat — put it in the pleasure box'},
   };
 
   function validateField(meal, cat, value) {
@@ -560,7 +556,10 @@
         existing.id = flagId;
         existing.style.cssText = 'font-size:11px;color:#c97070;background:#fff0f0;border:1px dashed #e8b0b0;border-radius:6px;padding:4px 8px;margin:2px 12px 4px;line-height:1.4;';
         const inputEl = document.getElementById('meal_'+meal+'_'+cat);
-        if(inputEl) inputEl.parentNode.insertBefore(existing, inputEl.nextSibling);
+        if(inputEl) {
+          const rowEl = inputEl.closest('.meal-row') || inputEl.parentNode;
+          rowEl.parentNode.insertBefore(existing, rowEl.nextSibling);
+        }
       }
       existing.innerHTML = flags.join('<br>');
     } else if(existing) {
@@ -597,7 +596,8 @@
           flag = document.createElement('div');
           flag.id = flagId;
           flag.style.cssText = 'font-size:11px;color:#c97070;background:#fff0f0;border:1px dashed #e8b0b0;border-radius:6px;padding:4px 8px;margin:2px 12px 4px;line-height:1.4;';
-          inputEl.parentNode.insertBefore(flag, inputEl.nextSibling);
+          const rowEl = inputEl.closest('.meal-row') || inputEl.parentNode;
+          rowEl.parentNode.insertBefore(flag, rowEl.nextSibling);
         }
         flag.innerHTML = '⚠ ' + res.message;
       }
@@ -619,6 +619,71 @@
       scheduleApiValidation(meal, cat, val);
     }
   }
+
+  const brandNames = {
+    'nugo slim':          'NuGo Slim',
+    'nugo bar':           'NuGo Slim',
+    'nugo':               'NuGo Slim',
+    'grenade carb killa': 'Grenade Carb Killa',
+    'grenade bar':        'Grenade Carb Killa',
+    'grenade':            'Grenade Carb Killa',
+    'fulfil protein bar': 'FULFIL Protein Bar',
+    'fulfil bar':         'FULFIL Protein Bar',
+    'fulfil':             'FULFIL Protein Bar',
+    'kind protein bar':   'KIND Protein Bar',
+    'kind bar':           'KIND Bar',
+    'rxbar':              'RXBAR',
+    'rx bar':             'RXBAR',
+    'quest protein bar':  'Quest Protein Bar',
+    'quest bar':          'Quest Protein Bar',
+    'quest':              'Quest Protein Bar',
+    'clif bar':           'CLIF Bar',
+    'clif':               'CLIF Bar',
+    'nakd bar':           'Nakd Bar',
+    'nakd':               'Nakd Bar',
+    'trek bar':           'Trek Protein Bar',
+    'trek':               'Trek Protein Bar',
+    'atkins bar':         'Atkins Bar',
+    'atkins':             'Atkins Bar',
+    'fage':               'FAGE Total Greek Yoghurt',
+    'oikos':              'Oikos Triple Zero Greek Yoghurt',
+    'chobani':            'Chobani Greek Yoghurt',
+    'siggi':              "Siggi's Skyr",
+    'muscle mousse':      'Muscle Mousse Protein Dessert',
+    'premier protein':    'Premier Protein Shake',
+    'fairlife':           'Fairlife Core Power',
+    'core power':         'Fairlife Core Power',
+    'halo top':           'Halo Top',
+    'kodiak cakes':       'Kodiak Cakes',
+    'kodiak':             'Kodiak Cakes',
+  };
+
+  function normalizeFood(inputEl) {
+    const raw = inputEl.value;
+    if (!raw.trim()) return;
+    const lower = raw.trim().toLowerCase();
+    const keys = Object.keys(brandNames).sort((a, b) => b.length - a.length);
+    for (const key of keys) {
+      const idx = lower.indexOf(key);
+      if (idx !== -1) {
+        const before = raw.slice(0, idx);
+        const after = raw.slice(idx + key.length);
+        const normalized = before + brandNames[key] + after;
+        if (normalized !== raw) {
+          inputEl.value = normalized;
+          const parts = inputEl.id.split('_');
+          if (parts.length === 3) syncMealField(parts[1], parts[2]);
+        }
+        break;
+      }
+    }
+  }
+
+  document.addEventListener('blur', function(e) {
+    if (e.target.classList && e.target.classList.contains('formula-input')) {
+      normalizeFood(e.target);
+    }
+  }, true);
 
   function setMealFields(meal, value) {
     // Parse saved value back into fields
