@@ -289,6 +289,7 @@
         <textarea class="win-input" id="winInput" placeholder="Any win counts &#8212; big or tiny..." rows="2"></textarea>
       </div>
       <button class="save-btn" onclick="saveDay()">Save Day &#10003;</button>
+      <span id="autoSaveInd" style="font-size:11px;color:var(--muted);opacity:0;transition:opacity 0.4s;margin-left:10px;vertical-align:middle;">&#10003; saved</span>
       <button onclick="saveAsPNG()" style="width:100%;background:rgba(139,74,60,0.08);color:var(--warm);border:1.5px solid var(--rose);border-radius:14px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:8px;">&#128248; Save as image</button>
     </div>
 
@@ -556,6 +557,15 @@
     'olive tapenade': {belongs:'pleasure',msg:'Tapenade is a fat — pleasure box or alongside'},
     'tapenade':       {belongs:'pleasure',msg:'Tapenade is a fat — pleasure box or alongside'},
   };
+  let _autoSaveTimer = null;
+  function scheduleAutoSave() {
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = setTimeout(() => {
+      saveDay(true);
+      const ind = document.getElementById('autoSaveInd');
+      if (ind) { ind.style.opacity = '1'; setTimeout(() => { ind.style.opacity = '0'; }, 1000); }
+    }, 1200);
+  }
   const FOOD_HIST_KEY = 'pp_food_history';
   const _defPlaceholders = {
     breakfast:{protein:'e.g. eggs, Alpro soya drink, protein bar',carb:'e.g. banana, granola bar, oat bar, flapjack',produce:'e.g. cucumber, tomatoes, peppers',pleasure:'e.g. coffee, something you love'},
@@ -1201,7 +1211,7 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     if(tab==='history')renderHistory();
   }
 
-  function saveDay(){
+  function saveDay(silent){
     const entry={
       date:activeKey,
       dateLabel:new Date(activeKey).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
@@ -1212,11 +1222,11 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
       steps:document.getElementById('stepsInput').value||'0',
       win:document.getElementById('winInput').value
     };
-    showToast('Saving... \u23F3');
+    if (!silent) { showToast('Saving... \u23F3'); }
     allData[activeKey] = entry;
     saveData(allData);
     updateFoodHistory();
-    showToast('Saved! Well done today \uD83C\uDF38');
+    if (!silent) { showToast('Saved! Well done today \uD83C\uDF38'); }
   }
 
   function loadDay(dateStr){
@@ -1290,6 +1300,7 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
 
   updateScore();loadToday();
   refreshFoodPlaceholders();
+  document.addEventListener('input', scheduleAutoSave);
 </script>
 </body>
 </html>
