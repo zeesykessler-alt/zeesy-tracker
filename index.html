@@ -853,10 +853,10 @@
           const parts = inputEl.id.split('_');
           if (parts.length === 3) syncMealField(parts[1], parts[2]);
         }
-        return;
+        break; // apply first local match as instant preview, then API overwrites
       }
     }
-    _apiNormalizeFood(inputEl);
+    _apiNormalizeFood(inputEl); // always call — handles any food worldwide
   }
 
   const _normTimers = {};
@@ -870,7 +870,7 @@
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 40,
-          messages: [{role:'user', content:`Format this food name correctly. Rules: always use Title Case, expand abbreviations (choc→Chocolate, yoghurt stays yoghurt), use official brand spelling if you recognise it (e.g. Mehadrin, Alpro, Grab1 Bar, FAGE). Return ONLY the formatted name, nothing else.\n\nFood: ${raw}`}]
+          messages: [{role:'user', content:`Format this food name correctly for a food diary. Rules: Title Case all words; use official brand capitalisation for any brand you recognise anywhere in the world (UK, US, Israeli, kosher, European, Asian — any brand); expand abbreviations (choc→Chocolate, pb→Peanut Butter); fix misspellings; keep it concise. Works for absolutely any food or brand worldwide. Reply with ONLY the formatted name, no explanation, no punctuation at end.\n\nFood: ${raw}`}]
         })
       });
       const d = await r.json();
