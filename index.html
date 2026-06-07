@@ -754,41 +754,87 @@
   }
 
   const brandNames = {
-    'nugo slim':          'NuGo Slim',
-    'nugo bar':           'NuGo Slim',
-    'nugo':               'NuGo Slim',
-    'grenade carb killa': 'Grenade Carb Killa',
-    'grenade bar':        'Grenade Carb Killa',
-    'grenade':            'Grenade Carb Killa',
-    'fulfil protein bar': 'FULFIL Protein Bar',
-    'fulfil bar':         'FULFIL Protein Bar',
-    'fulfil':             'FULFIL Protein Bar',
-    'kind protein bar':   'KIND Protein Bar',
-    'kind bar':           'KIND Bar',
-    'rxbar':              'RXBAR',
-    'rx bar':             'RXBAR',
-    'quest protein bar':  'Quest Protein Bar',
-    'quest bar':          'Quest Protein Bar',
-    'quest':              'Quest Protein Bar',
-    'clif bar':           'CLIF Bar',
-    'clif':               'CLIF Bar',
-    'nakd bar':           'Nakd Bar',
-    'nakd':               'Nakd Bar',
-    'trek bar':           'Trek Protein Bar',
-    'trek':               'Trek Protein Bar',
-    'atkins bar':         'Atkins Bar',
-    'atkins':             'Atkins Bar',
-    'fage':               'FAGE Total Greek Yoghurt',
-    'oikos':              'Oikos Triple Zero Greek Yoghurt',
-    'chobani':            'Chobani Greek Yoghurt',
-    'siggi':              "Siggi's Skyr",
-    'muscle mousse':      'Muscle Mousse Protein Dessert',
-    'premier protein':    'Premier Protein Shake',
-    'fairlife':           'Fairlife Core Power',
-    'core power':         'Fairlife Core Power',
-    'halo top':           'Halo Top',
-    'kodiak cakes':       'Kodiak Cakes',
-    'kodiak':             'Kodiak Cakes',
+    // Zeesy's actual foods
+    'mehadrin greek':         'Mehadrin Greek Yoghurt',
+    'mehadrin':               'Mehadrin',
+    'grab1 bar':              'Grab1 Bar',
+    'grab1':                  'Grab1 Bar',
+    'grab 1':                 'Grab1 Bar',
+    'alpro chocolate soya':   'Alpro Chocolate Soya Drink',
+    'alpro choc soya':        'Alpro Chocolate Soya Drink',
+    'alpro chocolate':        'Alpro Chocolate Soya Drink',
+    'alpro choc':             'Alpro Chocolate Soya Drink',
+    'alpro soya':             'Alpro Soya Drink',
+    'alpro':                  'Alpro',
+    'sally williams nougat':  'Sally Williams Nougat',
+    'sally williams':         'Sally Williams Nougat',
+    'peanut butter energy':   'Peanut Butter Energy Bar',
+    'chocolate chip oat bar': 'Chocolate Chip Oat Bar',
+    'chocolate chip flapjack':'Chocolate Chip Flapjack',
+    'granola bar':            'Granola Bar',
+    'granola bites':          'Granola Bites',
+    'pesto chips':            'Pesto Chips',
+    'caramelised pecans':     'Caramelised Pecans',
+    'caramelized pecans':     'Caramelised Pecans',
+    'frozen yogurt':          'Frozen Yoghurt (Froyo)',
+    'froyo':                  'Frozen Yoghurt (Froyo)',
+    'thousand islands':       'Thousand Islands Dip',
+    'thousand island':        'Thousand Islands Dip',
+    'sweet chilli dip':       'Sweet Chilli Dip',
+    'sweet chili dip':        'Sweet Chilli Dip',
+    'israeli salad':          'Israeli Salad',
+    'olive tapenade':         'Olive Tapenade',
+    'beer bread':             'Beer Bread',
+    'seed crackers':          'Seed Crackers',
+    'rice cakes':             'Rice Cakes',
+    'brown rice noodles':     'Brown Rice Noodles',
+    'poke bowl':              'Poke Bowl',
+    'hot dog':                'Hot Dog',
+    'deep pan pizza':         'Deep Pan Pizza',
+    'zaatar chicken':         'Za\'atar Chicken Breast',
+    'chicken satay':          'Chicken Satay',
+    'sesame chicken':         'Sesame Chicken',
+    'chicken tempura':        'Chicken Tempura Stir Fry',
+    'chicken tempura stir fry':'Chicken Tempura Stir Fry',
+    'sweet potato':           'Sweet Potato',
+    'potato wedges':          'Potato Wedges',
+    'green beans':            'Green Beans',
+    // Other bars & brands
+    'nugo slim':              'NuGo Slim',
+    'nugo bar':               'NuGo Slim',
+    'nugo':                   'NuGo Slim',
+    'grenade carb killa':     'Grenade Carb Killa',
+    'grenade bar':            'Grenade Carb Killa',
+    'grenade':                'Grenade Carb Killa',
+    'fulfil protein bar':     'FULFIL Protein Bar',
+    'fulfil bar':             'FULFIL Protein Bar',
+    'fulfil':                 'FULFIL Protein Bar',
+    'kind protein bar':       'KIND Protein Bar',
+    'kind bar':               'KIND Bar',
+    'rxbar':                  'RXBAR',
+    'rx bar':                 'RXBAR',
+    'quest protein bar':      'Quest Protein Bar',
+    'quest bar':              'Quest Protein Bar',
+    'quest':                  'Quest Protein Bar',
+    'clif bar':               'CLIF Bar',
+    'clif':                   'CLIF Bar',
+    'nakd bar':               'Nakd Bar',
+    'nakd':                   'Nakd Bar',
+    'trek bar':               'Trek Protein Bar',
+    'trek':                   'Trek Protein Bar',
+    'atkins bar':             'Atkins Bar',
+    'atkins':                 'Atkins Bar',
+    'fage':                   'FAGE Total Greek Yoghurt',
+    'oikos':                  'Oikos Triple Zero Greek Yoghurt',
+    'chobani':                'Chobani Greek Yoghurt',
+    'siggi':                  "Siggi's Skyr",
+    'muscle mousse':          'Muscle Mousse Protein Dessert',
+    'premier protein':        'Premier Protein Shake',
+    'fairlife':               'Fairlife Core Power',
+    'core power':             'Fairlife Core Power',
+    'halo top':               'Halo Top',
+    'kodiak cakes':           'Kodiak Cakes',
+    'kodiak':                 'Kodiak Cakes',
   };
 
   function normalizeFood(inputEl) {
@@ -813,6 +859,7 @@
     _apiNormalizeFood(inputEl);
   }
 
+  const _normTimers = {};
   async function _apiNormalizeFood(inputEl) {
     const raw = inputEl.value.trim();
     if (!raw || raw.length < 3) return;
@@ -823,12 +870,12 @@
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 40,
-          messages: [{role:'user', content:`What is the official brand/product name for "${raw}"? Reply with ONLY the exact name (e.g. "NuGo Slim", "FAGE Total 0%", "Grenade Carb Killa"). If it is a generic food like chicken, rice, salad, cucumber — reply with the original text unchanged. No explanation, no full stop.`}]
+          messages: [{role:'user', content:`Format this food name correctly. Rules: always use Title Case, expand abbreviations (choc→Chocolate, yoghurt stays yoghurt), use official brand spelling if you recognise it (e.g. Mehadrin, Alpro, Grab1 Bar, FAGE). Return ONLY the formatted name, nothing else.\n\nFood: ${raw}`}]
         })
       });
       const d = await r.json();
-      const name = (d.content?.[0]?.text || '').trim().replace(/[."']$/,'');
-      if (name && name.toLowerCase() !== raw.toLowerCase() && !name.includes('\n') && name.length < 80) {
+      const name = (d.content?.[0]?.text || '').trim().replace(/[."'\n]/g,'').trim();
+      if (name && name.length > 0 && name.length < 80) {
         inputEl.value = name;
         const parts = inputEl.id.split('_');
         if (parts.length === 3) syncMealField(parts[1], parts[2]);
@@ -836,11 +883,24 @@
     } catch(e) {}
   }
 
+  function scheduleNormalize(inputEl) {
+    const key = inputEl.id;
+    clearTimeout(_normTimers[key]);
+    _normTimers[key] = setTimeout(() => normalizeFood(inputEl), 2500);
+  }
+
   document.addEventListener('blur', function(e) {
     if (e.target.classList && e.target.classList.contains('formula-input')) {
+      clearTimeout(_normTimers[e.target.id]);
       normalizeFood(e.target);
     }
   }, true);
+
+  document.addEventListener('input', function(e) {
+    if (e.target.classList && e.target.classList.contains('formula-input')) {
+      scheduleNormalize(e.target);
+    }
+  });
 
   function setMealFields(meal, value) {
     // Parse saved value back into fields
