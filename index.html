@@ -326,9 +326,13 @@
 <script>
   const today=new Date();
   const _ak=atob(['c2stYW50LWFwaTAzLW5ibU5PRFNw','Y3JsZ3RGQzc3ejdQaEZnTDg3ci1a','bXFjMExCYjVfZ3pzX1FQdUhOYnRq','dl8wZl92dWZZQkRDa3pZS2xVUm93','Z0luM0hrRUVpaTBsT1l3LXpYOG1Xd0FB'].join(''));
-  const todayKey=today.toISOString().split('T')[0];
+  // A: timezone-safe local date string helper
+  function toLocalDateStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  const todayKey=toLocalDateStr(today);
   let activeKey=todayKey; // the day currently being viewed/edited
   let checks={};
+  // H: pre-populate allData from localStorage at module init so saveDay never overwrites previous days
+  let allData = (function(){ try{ return JSON.parse(localStorage.getItem('pp_daily'))||{}; }catch(e){ return {}; } })();
 
   function setActiveDate(dateStr) {
     if(activeKey && activeKey !== dateStr) saveDay(true);
@@ -349,6 +353,8 @@
     });
     document.getElementById('stepsInput').value='';
     document.getElementById('winInput').value='';
+    // C: clear inline validation flag divs so they don't persist across day navigation
+    document.querySelectorAll('[id^="flag_"]').forEach(el=>el.remove());
     updateSteps(0);
     updateScore();
     updateWeekBar();
@@ -360,7 +366,7 @@
     d.setDate(d.getDate() + dir);
     // Don't go into the future
     if(d > today) return;
-    setActiveDate(d.toISOString().split('T')[0]);
+    setActiveDate(toLocalDateStr(d)); // A: use local date string, not UTC
   }
 
   function jumpToDate(val) {
@@ -482,10 +488,8 @@
     document.getElementById('strength_item').style.display = phase.showStrength ? '' : 'none';
     document.getElementById('carbcheck_item').style.display = phase.showCarbs ? '' : 'none';
 
-    // Update score pill max
-    const scoreEl = document.getElementById('scorePill');
-    const currentScore = Object.values(checks).filter(Boolean).length;
-    scoreEl.textContent = currentScore + '/' + phase.score;
+    // Score pill is updated by updateScore() which uses visible habit count (fix N)
+    updateScore();
   }
 
   // Init
@@ -496,10 +500,11 @@
   updateWeekBar();
 
   function updateScore(){
+    // N: use count of visible check-items as denominator so it matches phase
+    const visible = document.querySelectorAll('.check-item:not([style*="display:none"])').length;
     const n=Object.values(checks).filter(Boolean).length;
-    const msgs=['','keep going!','doing great!','halfway there!','almost there!','crushing it! \uD83C\uDF89'];
     const pillEl=document.getElementById('scorePill');
-    if(pillEl) pillEl.textContent=n+' habits \u2713';
+    if(pillEl) pillEl.textContent=n+'/'+visible;
   }
 
   let formulaChecks = {};
@@ -591,7 +596,8 @@
     let html = '';
     if (matches.length) {
       html += '<div class="dd-section">Your foods</div>';
-      html += matches.slice(0,5).map(f=>'<div class="dd-item" onmousedown="event.preventDefault();selectFood(\''+meal+'\',\''+cat+'\',\''+f.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">' + f + '</div>').join('');
+      // D: use data-attributes instead of inline onmousedown so apostrophes in food names are safe
+      html += matches.slice(0,5).map(f=>'<div class="dd-item" data-meal="'+meal+'" data-cat="'+cat+'" data-food="'+f.replace(/"/g,'&quot;')+'">'+f+'</div>').join('');
     }
     if (html) { drop.innerHTML = html; drop.style.display = 'block'; } else { drop.innerHTML = ''; drop.style.display = 'none'; }
     clearTimeout(_ddApiTimers[meal+'_'+cat]);
@@ -610,9 +616,10 @@
       const h = JSON.parse(localStorage.getItem(FOOD_HIST_KEY)||'{}');
       const matches = (h[cat]||[]).filter(f=>f.toLowerCase().includes(val.toLowerCase()));
       let html = '';
-      if (matches.length) { html += '<div class="dd-section">Your foods</div>'; html += matches.slice(0,4).map(f=>'<div class="dd-item" onmousedown="event.preventDefault();selectFood(\''+meal+'\',\''+cat+'\',\''+f.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">' + f + '</div>').join(''); }
+      // D: use data-attributes for apostrophe safety
+      if (matches.length) { html += '<div class="dd-section">Your foods</div>'; html += matches.slice(0,4).map(f=>'<div class="dd-item" data-meal="'+meal+'" data-cat="'+cat+'" data-food="'+f.replace(/"/g,'&quot;')+'">'+f+'</div>').join(''); }
       const fresh = suggestions.filter(s=>!matches.some(m=>m.toLowerCase()===s.toLowerCase()));
-      if (fresh.length) { html += '<div class="dd-section">Suggestions</div>'; html += fresh.map(f=>'<div class="dd-item" onmousedown="event.preventDefault();selectFood(\''+meal+'\',\''+cat+'\',\''+f.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">' + f + '</div>').join(''); }
+      if (fresh.length) { html += '<div class="dd-section">Suggestions</div>'; html += fresh.map(f=>'<div class="dd-item" data-meal="'+meal+'" data-cat="'+cat+'" data-food="'+f.replace(/"/g,'&quot;')+'">'+f+'</div>').join(''); }
       if (html) { drop.innerHTML = html; drop.style.display = 'block'; }
     } catch(e) {}
   }
@@ -1257,7 +1264,7 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
   }
 
   // ── PERSISTENT STORAGE ──
-  let allData = {};
+  // allData is already initialised at top of script (fix H)
 
   function loadData(){
     try{const d=localStorage.getItem('pp_daily');return d?JSON.parse(d):{};}catch(e){return {};}
@@ -1323,11 +1330,18 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
     loadDay(activeKey);
   }
 
+  // B: helper to render meal objects as readable strings (handles both string legacy and new object format)
+  function mealSummary(m){ if(!m) return ''; if(typeof m==='string') return m; return ['protein','carb','produce','pleasure'].map(c=>m[c]).filter(Boolean).join(' \u00B7 '); }
   function renderHistory(){
     const entries=Object.values(allData).sort((a,b)=>b.date.localeCompare(a.date));
     const c=document.getElementById('historyContainer');
     if(!entries.length){c.innerHTML='<div class="h-empty">No entries yet \uD83C\uDF31</div>';return;}
-    c.innerHTML=entries.map(e=>`<div class="h-entry"><div class="h-date">${e.dateLabel}</div><div class="h-pills"><span class="h-pill">${e.score}/5 habits</span>${e.steps&&e.steps!=='0'?'<span class="h-pill">'+parseInt(e.steps).toLocaleString()+' steps</span>':''}</div>${e.meals?.breakfast?'<div class="h-meal">\uD83C\uDF05 '+e.meals.breakfast+'</div>':''}${e.meals?.lunch?'<div class="h-meal">\u2600\uFE0F '+e.meals.lunch+'</div>':''}${e.meals?.supper?'<div class="h-meal">\uD83C\uDF19 '+e.meals.supper+'</div>':''}${e.win?'<div class="h-win">\u2728 "'+e.win+'"</div>':''}</div>`).join('');
+    c.innerHTML=entries.map(e=>{
+      const bf=mealSummary(e.meals?.breakfast);
+      const lu=mealSummary(e.meals?.lunch);
+      const su=mealSummary(e.meals?.supper);
+      return `<div class="h-entry"><div class="h-date">${e.dateLabel}</div><div class="h-pills"><span class="h-pill">${e.score}/5 habits</span>${e.steps&&e.steps!=='0'?'<span class="h-pill">'+parseInt(e.steps).toLocaleString()+' steps</span>':''}</div>${bf?'<div class="h-meal">\uD83C\uDF05 '+bf+'</div>':''}${lu?'<div class="h-meal">\u2600\uFE0F '+lu+'</div>':''}${su?'<div class="h-meal">\uD83C\uDF19 '+su+'</div>':''}${e.win?'<div class="h-win">\u2728 "'+e.win+'"</div>':''}</div>`;
+    }).join('');
   }
 
   function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;if(msg){t.classList.add('show');}else{t.classList.remove('show');}}
@@ -1376,6 +1390,17 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
       el.addEventListener('blur',function(){setTimeout(function(){hideFoodDropdown(meal,cat);},200);});
     });
   window.addEventListener('beforeunload', function(){ saveDay(true); });
+  // E: iOS Safari doesn't fire beforeunload reliably — visibilitychange is the backup
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') saveDay(true); });
+  // D: delegated listener for food dropdown items (safe with apostrophes via data-attributes)
+  document.addEventListener('mousedown', function(e){
+    var item = e.target.closest('.dd-item');
+    if(item){ e.preventDefault(); selectFood(item.dataset.meal, item.dataset.cat, item.dataset.food); }
+  });
+  document.addEventListener('touchstart', function(e){
+    var item = e.target.closest('.dd-item');
+    if(item){ e.preventDefault(); selectFood(item.dataset.meal, item.dataset.cat, item.dataset.food); }
+  }, {passive:false});
 </script>
 </body>
 </html>
