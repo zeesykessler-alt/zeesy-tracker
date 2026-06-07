@@ -114,6 +114,13 @@
   .modal-cancel{background:var(--blush);color:var(--deep);border:none;border-radius:12px;padding:14px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
   .modal-copy:active,.modal-cancel:active{opacity:0.8;}
   .copied-note{font-size:12px;color:var(--green);margin-top:8px;text-align:center;display:none;}
+  .meal-row{position:relative;}
+  .food-dropdown{position:absolute;top:calc(100% + 2px);left:0;right:0;background:white;border:1.5px solid #f0e0d8;border-radius:10px;box-shadow:0 6px 24px rgba(58,42,36,0.13);z-index:300;overflow:hidden;display:none;max-height:220px;overflow-y:auto;}
+  .dd-item{padding:11px 16px;font-size:14px;color:var(--text);cursor:pointer;border-bottom:1px solid #faf0ec;}
+  .dd-item:last-child{border-bottom:none;}
+  .dd-item:active{background:var(--blush);}
+  .dd-loading{padding:10px 16px;font-size:12px;color:var(--muted);font-style:italic;}
+  .dd-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 14px 4px;background:#fdf8f5;border-bottom:1px solid #f0e8e4;}
 
 </style>
 </head>
@@ -566,6 +573,61 @@
       const ind = document.getElementById('autoSaveInd');
       if (ind) { ind.style.opacity = '1'; setTimeout(() => { ind.style.opacity = '0'; }, 1000); }
     }, 1200);
+  }
+  const _ddApiTimers = {};
+  function showFoodDropdown(meal, cat, val) {
+    const dropId = 'drop_'+meal+'_'+cat;
+    let drop = document.getElementById(dropId);
+    if (!drop) {
+      const row = document.getElementById('meal_'+meal+'_'+cat)?.closest('.meal-row');
+      if (!row) return;
+      drop = document.createElement('div');
+      drop.id = dropId;
+      drop.className = 'food-dropdown';
+      row.appendChild(drop);
+    }
+    const h = JSON.parse(localStorage.getItem(FOOD_HIST_KEY)||'{}');
+    const matches = (h[cat]||[]).filter(f=>f.toLowerCase().includes(val.toLowerCase()));
+    let html = '';
+    if (matches.length) {
+      html += '<div class="dd-section">Your foods</div>';
+      html += matches.slice(0,5).map(f=>'<div class="dd-item" onmousedown="event.preventDefault();selectFood(\''+meal+'\',\''+cat+'\',\''+f.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">' + f + '</div>').join('');
+    }
+    if (html) { drop.innerHTML = html; drop.style.display = 'block'; } else { drop.innerHTML = ''; drop.style.display = 'none'; }
+    clearTimeout(_ddApiTimers[meal+'_'+cat]);
+    _ddApiTimers[meal+'_'+cat] = setTimeout(()=>_fetchFoodSuggestions(meal,cat,val,drop), 500);
+  }
+  async function _fetchFoodSuggestions(meal, cat, val, drop) {
+    if (!val || val.length < 2) return;
+    const catDesc = {protein:'protein (meat/fish/eggs/dairy/legumes/cheese/yoghurt)',carb:'carb (grains/bread/fruit/starchy veg — fruit and potatoes are carbs)',produce:'produce (non-starchy vegetables only)',pleasure:'pleasure (anything enjoyable — treats/condiments/sauces/drinks)'};
+    const prompt = 'User is typing "'+val+'" in the '+cat+' box ('+catDesc[cat]+'). Using Lauren Parker postpartum plate formula rules (fruit=carb, potato=carb, cheese=protein). Suggest 4 real specific food names that match what they\'re typing and belong in '+cat+'. Reply ONLY with a JSON array of strings like ["food1","food2"]. No explanation.';
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':_ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:100,messages:[{role:'user',content:prompt}]})});
+      const d = await r.json();
+      const txt = d.content?.[0]?.text||'[]';
+      const suggestions = JSON.parse(txt.replace(/```json|```/g,'').trim());
+      if (!Array.isArray(suggestions)||!suggestions.length) return;
+      const h = JSON.parse(localStorage.getItem(FOOD_HIST_KEY)||'{}');
+      const matches = (h[cat]||[]).filter(f=>f.toLowerCase().includes(val.toLowerCase()));
+      let html = '';
+      if (matches.length) { html += '<div class="dd-section">Your foods</div>'; html += matches.slice(0,4).map(f=>'<div class="dd-item" onmousedown="event.preventDefault();selectFood(\''+meal+'\',\''+cat+'\',\''+f.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">' + f + '</div>').join(''); }
+      const fresh = suggestions.filter(s=>!matches.some(m=>m.toLowerCase()===s.toLowerCase()));
+      if (fresh.length) { html += '<div class="dd-section">Suggestions</div>'; html += fresh.map(f=>'<div class="dd-item" onmousedown="event.preventDefault();selectFood(\''+meal+'\',\''+cat+'\',\''+f.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">' + f + '</div>').join(''); }
+      if (html) { drop.innerHTML = html; drop.style.display = 'block'; }
+    } catch(e) {}
+  }
+  function selectFood(meal, cat, food) {
+    const el = document.getElementById('meal_'+meal+'_'+cat);
+    if (el) { el.value = food; syncMealField(meal, cat); }
+    hideFoodDropdown(meal, cat);
+    scheduleAutoSave();
+  }
+  function hideFoodDropdown(meal, cat) {
+    const drop = document.getElementById('drop_'+meal+'_'+cat);
+    if (drop) drop.style.display = 'none';
+  }
+  function hideAllDropdowns() {
+    document.querySelectorAll('.food-dropdown').forEach(d=>d.style.display='none');
   }
   const FOOD_HIST_KEY = 'pp_food_history';
   const _defPlaceholders = {
@@ -1306,6 +1368,13 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
   updateScore();loadToday();
   refreshFoodPlaceholders();
   document.addEventListener('input', scheduleAutoSave);
+    document.querySelectorAll('.formula-input').forEach(function(el){
+      var parts=el.id.split('_');
+      if(parts.length<3)return;
+      var meal=parts[1],cat=parts[2];
+      el.addEventListener('input',function(){if(this.value.trim().length>=1)showFoodDropdown(meal,cat,this.value.trim());else hideFoodDropdown(meal,cat);});
+      el.addEventListener('blur',function(){setTimeout(function(){hideFoodDropdown(meal,cat);},200);});
+    });
   window.addEventListener('beforeunload', function(){ saveDay(true); });
 </script>
 </body>
