@@ -869,6 +869,39 @@
     'sweet potato':           'Sweet Potato',
     'potato wedges':          'Potato Wedges',
     'green beans':            'Green Beans',
+    'meridian whole':         'Meridian Whole Nut Butter',
+    'meridian smooth':        'Meridian Smooth Peanut Butter',
+    'meridian peanut':        'Meridian Peanut Butter',
+    'meridian almond':        'Meridian Almond Butter',
+    'meridian':               'Meridian',
+    'oatly barista':          'Oatly Barista Oat Milk',
+    'oatly':                  'Oatly',
+    'jordans':                "Jordan's",
+    "jordan's":               "Jordan's",
+    'jordans granola':        "Jordan's Granola",
+    "jordan's granola":       "Jordan's Granola",
+    'jordans raisin':         "Jordan's Raisin & Almond Granola",
+    'pret':                   'Pret a Manger',
+    'innocent':               'Innocent',
+    'innocent smoothie':      'Innocent Smoothie',
+    'ella':                   "Ella's Kitchen",
+    'ella kitchen':           "Ella's Kitchen",
+    'pip nut':                "Pip & Nut",
+    'pip and nut':            "Pip & Nut",
+    'whole earth':            'Whole Earth',
+    'meridian tahini':        'Meridian Tahini',
+    'biona':                  'Biona',
+    'rude health':            'Rude Health',
+    'nakula':                 'Nakula',
+    'rebel kitchen':          'Rebel Kitchen',
+    'ombar':                  'Ombar',
+    'booja booja':            'Booja-Booja',
+    'tesco':                  'Tesco',
+    'sainsburys':             "Sainsbury's",
+    "sainsbury's":            "Sainsbury's",
+    'waitrose':               'Waitrose',
+    'marks spencer':          'M&S',
+    'm&s':                    'M&S',
     // Other bars & brands
     'nugo slim':              'NuGo Slim',
     'nugo bar':               'NuGo Slim',
@@ -940,7 +973,7 @@
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 40,
-          messages: [{role:'user', content:`Format this food name correctly for a food diary. Rules: Title Case all words; use official brand capitalisation for any brand you recognise anywhere in the world (UK, US, Israeli, kosher, European, Asian — any brand); expand abbreviations (choc→Chocolate, pb→Peanut Butter); fix misspellings; keep it concise. Works for absolutely any food or brand worldwide. Reply with ONLY the formatted name, no explanation, no punctuation at end.\n\nFood: ${raw}`}]
+          messages: [{role:'user', content:`Format this food name for a food diary. Rules: (1) If there is a brand name, put it FIRST — e.g. "peanut butter meridian whole" → "Meridian Whole Peanut Butter", "oat milk barista oatly" → "Oatly Barista Oat Milk"; (2) Use the brand's official capitalisation for any brand worldwide (Oatly, Meridian, Jordan's, Tesco, FAGE, Alpro, Mehadrin, Grenade, etc.); (3) Title Case all other words; (4) Expand abbreviations (choc→Chocolate, pb→Peanut Butter); (5) Fix misspellings. Reply with ONLY the formatted name, nothing else.\n\nFood: ${raw}`}]
         })
       });
       const d = await r.json();
