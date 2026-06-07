@@ -642,6 +642,25 @@
     lunch:{protein:'e.g. eggs, edamame, chicken',carb:'e.g. rice, pasta, sourdough, challah, rice cakes',produce:'e.g. Israeli salad, cucumber, peppers, mushrooms',pleasure:'e.g. chummus, techina, matbucha, balsamic dressing'},
     supper:{protein:'e.g. chicken, schnitzel, meatballs, hot dog',carb:'e.g. potato wedges, sweet potato, kugel, rice',produce:'e.g. broccoli, green beans, cauliflower, aubergine',pleasure:'e.g. chips, froyo, brownies, something sweet'}
   };
+
+  function applyLocalNorm(str) {
+    if (!str || !str.trim()) return str;
+    const s = str.trim().replace(/[,;.]+$/, '').trim();
+    if (!s) return '';
+    const lower = s.toLowerCase();
+    const keys = Object.keys(brandNames).sort((a,b)=>b.length-a.length);
+    for (const key of keys) {
+      const idx = lower.indexOf(key);
+      if (idx !== -1) {
+        const before = s.slice(0,idx);
+        const after = s.slice(idx+key.length);
+        const result = before + brandNames[key] + after;
+        return result.replace(/\b\w/g, c=>c.toUpperCase()).replace(/\b(Of|The|And|In|On|At|To|For|A|An)\b/g,m=>m.toLowerCase());
+      }
+    }
+    return s.replace(/\b\w/g, c=>c.toUpperCase()).replace(/\b(Of|The|And|In|On|At|To|For|A|An)\b/g,m=>m.toLowerCase());
+  }
+
   function updateFoodHistory() {
     const h = JSON.parse(localStorage.getItem(FOOD_HIST_KEY)||'{}');
     ['breakfast','lunch','supper'].forEach(meal=>{
@@ -649,26 +668,77 @@
         const el = document.getElementById('meal_'+meal+'_'+cat);
         if(!el||!el.value.trim()) return;
         if(!h[cat]) h[cat]=[];
-        const v = el.value.trim();
-        h[cat] = h[cat].filter(f=>f.toLowerCase()!==v.toLowerCase());
-        h[cat].unshift(v);
-        h[cat] = h[cat].slice(0,8);
+        // Split multi-food entries by comma or newline, save each separately
+        const foods = el.value.split(/[,\n]+/).map(f=>applyLocalNorm(f.trim())).filter(Boolean);
+        foods.forEach(v=>{
+          h[cat] = h[cat].filter(f=>f.toLowerCase()!==v.toLowerCase());
+          h[cat].unshift(v);
+        });
+        h[cat] = h[cat].slice(0,10);
       });
     });
+    // Deduplicate
+    Object.keys(h).forEach(cat=>{
+      const seen=new Set();
+      h[cat]=h[cat].filter(f=>{const k=f.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;});
+    });
     localStorage.setItem(FOOD_HIST_KEY, JSON.stringify(h));
-    refreshFoodPlaceholders();
   }
+
   function refreshFoodPlaceholders() {
-    const h = JSON.parse(localStorage.getItem(FOOD_HIST_KEY)||'{}');
+    // Placeholder shows default hint only — history appears in the dropdown
     ['breakfast','lunch','supper'].forEach(meal=>{
       ['protein','carb','produce','pleasure'].forEach(cat=>{
         const el = document.getElementById('meal_'+meal+'_'+cat);
         if(!el) return;
-        const recent=(h[cat]||[]).slice(0,3);
-        el.placeholder = recent.length ? recent.join(', ') : (_defPlaceholders[meal]?.[cat]||'');
+        el.placeholder = _defPlaceholders[meal]?.[cat] || '';
       });
     });
   }
+
+  function migrateData() {
+    try {
+      let changed = false;
+      Object.values(allData).forEach(entry=>{
+        if(!entry.meals) return;
+        ['breakfast','lunch','supper'].forEach(meal=>{
+          const m = entry.meals[meal];
+          if(!m||typeof m!=='object') return;
+          ['protein','carb','produce','pleasure'].forEach(cat=>{
+            if(!m[cat]||!m[cat].trim()) return;
+            const lines = m[cat].split('\n').map(l=>applyLocalNorm(l)).filter(Boolean);
+            const corrected = lines.join('\n');
+            if(corrected!==m[cat]){m[cat]=corrected;changed=true;}
+          });
+        });
+      });
+      if(changed) saveData(allData);
+    } catch(e){}
+  }
+
+  function migrateHistory() {
+    try {
+      const h = JSON.parse(localStorage.getItem(FOOD_HIST_KEY)||'{}');
+      let changed = false;
+      Object.keys(h).forEach(cat=>{
+        const corrected = [];
+        const seen = new Set();
+        h[cat].forEach(f=>{
+          const v = applyLocalNorm(f.replace(/[,;.]+$/,'').trim());
+          if(!v) return;
+          const k = v.toLowerCase();
+          if(seen.has(k)){changed=true;return;}
+          seen.add(k);
+          if(v!==f) changed=true;
+          corrected.push(v);
+        });
+        h[cat] = corrected;
+      });
+      if(changed) localStorage.setItem(FOOD_HIST_KEY, JSON.stringify(h));
+    } catch(e){}
+  }
+
+
 
   function validateField(meal, cat, value) {
     const input = value.toLowerCase().trim();
@@ -883,7 +953,7 @@
     } catch(e) {}
   }
 
-  function autoGrow(el){el.style.height="auto";el.style.height=el.scrollHeight+"px";}
+  function autoGrow(el){el.style.height="auto";el.style.height=(el.value.trim()?el.scrollHeight:42)+"px";}
 
   function scheduleNormalize(inputEl) {
     const key = inputEl.id;
@@ -1452,6 +1522,8 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
       el.addEventListener('blur',function(){setTimeout(function(){hideFoodDropdown(meal,cat);},200);});
     });
   window.addEventListener('beforeunload', function(){ saveDay(true); });
+    migrateHistory();
+    migrateData();
   // E: iOS Safari doesn't fire beforeunload reliably — visibilitychange is the backup
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') saveDay(true); });
   // D: delegated listener for food dropdown items (safe with apostrophes via data-attributes)
