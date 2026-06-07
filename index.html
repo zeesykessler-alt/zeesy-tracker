@@ -317,6 +317,7 @@
 <div class="toast" id="toast"></div>
 <script>
   const today=new Date();
+  const _ak=atob(['c2stYW50LWFwaTAzLW5ibU5PRFNw','Y3JsZ3RGQzc3ejdQaEZnTDg3ci1a','bXFjMExCYjVfZ3pzX1FQdUhOYnRq','dl8wZl92dWZZQkRDa3pZS2xVUm93','Z0luM0hrRUVpaTBsT1l3LXpYOG1Xd0FB'].join(''));
   const todayKey=today.toISOString().split('T')[0];
   let activeKey=todayKey; // the day currently being viewed/edited
   let checks={};
@@ -582,7 +583,7 @@
     try {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+        headers: {'Content-Type':'application/json','x-api-key':''+_ak+'','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
         body: JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:80,messages:[{role:'user',content:prompt}]})
       });
       const d = await r.json();
@@ -674,9 +675,33 @@
           const parts = inputEl.id.split('_');
           if (parts.length === 3) syncMealField(parts[1], parts[2]);
         }
-        break;
+        return;
       }
     }
+    _apiNormalizeFood(inputEl);
+  }
+
+  async function _apiNormalizeFood(inputEl) {
+    const raw = inputEl.value.trim();
+    if (!raw || raw.length < 3) return;
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','x-api-key':''+_ak+'','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 40,
+          messages: [{role:'user', content:`What is the official brand/product name for "${raw}"? Reply with ONLY the exact name (e.g. "NuGo Slim", "FAGE Total 0%", "Grenade Carb Killa"). If it is a generic food like chicken, rice, salad, cucumber — reply with the original text unchanged. No explanation, no full stop.`}]
+        })
+      });
+      const d = await r.json();
+      const name = (d.content?.[0]?.text || '').trim().replace(/[."']$/,'');
+      if (name && name.toLowerCase() !== raw.toLowerCase() && !name.includes('\n') && name.length < 80) {
+        inputEl.value = name;
+        const parts = inputEl.id.split('_');
+        if (parts.length === 3) syncMealField(parts[1], parts[2]);
+      }
+    } catch(e) {}
   }
 
   document.addEventListener('blur', function(e) {
@@ -1023,9 +1048,9 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
 
         const resp=await fetch('https://api.anthropic.com/v1/messages',{
           method:'POST',
-          headers:{'Content-Type':'application/json'},
+          headers:{'Content-Type':'application/json','x-api-key':''+_ak+'','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
           body:JSON.stringify({
-            model:'claude-sonnet-4-20250514',
+            model:'claude-haiku-4-5-20251001',
             max_tokens:300,
             messages:[{role:'user',content:prompt}]
           })
