@@ -324,6 +324,7 @@
   let checks={};
 
   function setActiveDate(dateStr) {
+    if(activeKey && activeKey !== dateStr) saveDay(true);
     activeKey = dateStr;
     const d = new Date(dateStr);
     document.getElementById('dateDisplay').textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
@@ -331,7 +332,7 @@
     // Reset form
     checks={};
     formulaChecks={};
-    document.querySelectorAll('.habit-item').forEach(el=>el.classList.remove('checked'));
+    document.querySelectorAll('.check-item').forEach(el=>el.classList.remove('checked'));
     document.querySelectorAll('.formula-check').forEach(el=>el.classList.remove('ticked'));
     ['breakfast','lunch','supper'].forEach(m=>{
       const el=document.getElementById('meal_'+m);if(el)el.value='';
@@ -1218,7 +1219,11 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
       checks:{...checks},
       formulaChecks:{...formulaChecks},
       score:Object.values(checks).filter(Boolean).length,
-      meals:{breakfast:document.getElementById('meal_breakfast').value,lunch:document.getElementById('meal_lunch').value,supper:document.getElementById('meal_supper').value},
+      meals:{
+        breakfast:{protein:document.getElementById('meal_breakfast_protein')?.value||'',carb:document.getElementById('meal_breakfast_carb')?.value||'',produce:document.getElementById('meal_breakfast_produce')?.value||'',pleasure:document.getElementById('meal_breakfast_pleasure')?.value||''},
+        lunch:{protein:document.getElementById('meal_lunch_protein')?.value||'',carb:document.getElementById('meal_lunch_carb')?.value||'',produce:document.getElementById('meal_lunch_produce')?.value||'',pleasure:document.getElementById('meal_lunch_pleasure')?.value||''},
+        supper:{protein:document.getElementById('meal_supper_protein')?.value||'',carb:document.getElementById('meal_supper_carb')?.value||'',produce:document.getElementById('meal_supper_produce')?.value||'',pleasure:document.getElementById('meal_supper_pleasure')?.value||''}
+      },
       steps:document.getElementById('stepsInput').value||'0',
       win:document.getElementById('winInput').value
     };
@@ -1244,7 +1249,7 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
         if(el)el.classList.add('ticked');
       }
     });
-    if(e.meals){['breakfast','lunch','supper'].forEach(m=>{const hidden=document.getElementById('meal_'+m);if(hidden&&e.meals[m]){hidden.value=e.meals[m];setMealFields(m,e.meals[m]);}});}
+    if(e.meals){['breakfast','lunch','supper'].forEach(m=>{const meal=e.meals[m];if(!meal)return;if(typeof meal==='object'){['protein','carb','produce','pleasure'].forEach(cat=>{const el=document.getElementById('meal_'+m+'_'+cat);if(el&&meal[cat])el.value=meal[cat];});}else if(typeof meal==='string'&&meal){setMealFields(m,meal);}});}
     if(e.steps){document.getElementById('stepsInput').value=e.steps;updateSteps(e.steps);}
     if(e.win)document.getElementById('winInput').value=e.win;
     updateScore();
@@ -1301,6 +1306,7 @@ Categories: protein=meat/fish/eggs/dairy/legumes, carb=grains/bread/fruit/starch
   updateScore();loadToday();
   refreshFoodPlaceholders();
   document.addEventListener('input', scheduleAutoSave);
+  window.addEventListener('beforeunload', function(){ saveDay(true); });
 </script>
 </body>
 </html>
